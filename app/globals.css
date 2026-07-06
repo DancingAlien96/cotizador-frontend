@@ -24,3 +24,204 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- Documento: Carta de Garantía --- */
+.carta {
+  width: 100%;
+  max-width: 816px; /* ~ ancho carta (8.5in @ 96dpi) */
+  min-height: 1056px; /* ~ alto carta (11in @ 96dpi) */
+  margin: 0 auto;
+  background: #ffffff;
+  color: #111111;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.carta-body {
+  flex: 1 0 auto;
+  padding: 40px 76px 24px;
+}
+
+/* --- Documento: Cotización privada (oferta económica) --- */
+.cotizacion {
+  width: 100%;
+  max-width: 816px;
+  min-height: 1056px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #111111;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 15px;
+  line-height: 1.4;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.cotizacion-body {
+  flex: 1 0 auto;
+  padding: 24px 56px 16px;
+}
+
+.tabla-cotizacion {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+.tabla-cotizacion th,
+.tabla-cotizacion td {
+  border: 1px solid #000000;
+  padding: 7px 8px;
+  vertical-align: top;
+}
+.tabla-cotizacion th {
+  font-weight: 700;
+  text-align: center;
+}
+.tabla-cotizacion tbody td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* --- Cotización tienda (estilo hoja de cálculo) --- */
+.cotizacion.tienda {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.tienda-bar {
+  background: #27aae1;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 3px 8px;
+}
+.tabla-tienda {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tabla-tienda th {
+  background: #27aae1;
+  color: #ffffff;
+  border: 1px solid #9bced9;
+  padding: 5px 8px;
+  text-align: left;
+  font-size: 12px;
+}
+.tabla-tienda td {
+  border: 1px solid #c9c9c9;
+  padding: 7px 8px;
+  vertical-align: top;
+}
+.tabla-fechas td {
+  border: 1px solid #c9c9c9;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+/* --- Propuesta de piscina (documento multipágina PROASA) --- */
+.propuesta {
+  width: 100%;
+  max-width: 816px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.55;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+}
+.propuesta-inner {
+  padding: 56px 64px 64px;
+}
+.propuesta h2.sec {
+  color: #1c27d6;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 22px 0 8px;
+  border-bottom: 2px solid #1c27d6;
+  padding-bottom: 3px;
+}
+.propuesta .pre {
+  white-space: pre-line;
+}
+.tabla-piscina {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 12.5px;
+}
+.tabla-piscina th,
+.tabla-piscina td {
+  border: 1px solid #c9c9c9;
+  padding: 6px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+.tabla-piscina thead th {
+  background: #1c27d6;
+  color: #ffffff;
+  text-align: center;
+}
+.tabla-piscina .op {
+  text-align: center;
+  width: 130px;
+}
+.tabla-piscina tfoot td {
+  font-weight: 700;
+}
+.tabla-piscina .destacado {
+  background: #e8eaff;
+}
+
+/* Asegura que los colores del membrete/propuesta se impriman */
+.membrete,
+.membrete *,
+.propuesta,
+.propuesta * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* --- Impresión: solo la carta --- */
+@media print {
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  /* Ocultar todo excepto el área de impresión */
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .carta,
+  .cotizacion {
+    box-shadow: none;
+    max-width: none;
+    min-height: auto;
+    margin: 0;
+  }
+}
