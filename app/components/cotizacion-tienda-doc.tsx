@@ -23,11 +23,7 @@ export function CotizacionTiendaDoc({
 
   return (
     <article className="cotizacion tienda">
-      <MembreteHeader
-        logoSrc="/logopromesa.png"
-        showWordmark={false}
-        logoClass="h-16"
-      />
+      <MembreteHeader />
 
       <div className="cotizacion-body">
         {/* Encabezado: asesor y COTIZACIÓN + fechas */}

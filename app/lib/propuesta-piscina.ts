@@ -32,6 +32,9 @@ export type PropuestaPiscinaData = {
   condicionesPago: string;
   cronograma: FilaCronograma[];
   cronogramaNota: string;
+  // Anexo A — plano
+  planoTexto: string;
+  planoDataUrl: string; // imagen del plano (data URL) o ""
   // Cierre
   cierreTexto: string;
   asesor: string;
@@ -113,6 +116,9 @@ export const piscinaDefaults: PropuestaPiscinaData = {
   cronogramaNota:
     "En ejecución continua, la Opción 2 se estima en aproximadamente 75 días calendario (~11 semanas) y la Opción 1 en aproximadamente 85 a 90 días calendario, ejecutando en paralelo el cuarto de equipos con los trabajos del vaso. * La Fase 5 no incluye el tiempo de entrega de equipos por el proveedor (típicamente 3 a 6 semanas desde la orden de compra).",
 
+  planoTexto:
+    "Planta esquemática y corte A-A' de la piscina desbordante: vaso de 3.00 × 5.00 m con rebosadero perimetral oculto en tres lados (canal con rejilla a ras de piso), que conduce el agua a un tanque de compensación y al cuarto de equipos. El fondo presenta pendiente continua de 1.10 m (lado de las gradas) a 1.60 m (lado opuesto). Las gradas de acceso son a lo ancho (escalinata a todo el ancho de 3.00 m); este lado funciona como acceso y no desborda. Plano no a escala, sujeto a verificación y replanteo en sitio.",
+  planoDataUrl: "",
   cierreTexto:
     "Agradecemos la oportunidad de presentar esta propuesta. Quedamos atentos a sus comentarios, validaciones o aprobación para dar inicio a las actividades correspondientes.",
   asesor: "Eduardo Regalado",

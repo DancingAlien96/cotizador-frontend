@@ -104,6 +104,19 @@ export function EditorPiscina({
       if (id === currentId) handleNueva();
     });
   }
+  function handlePlanoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      alert("La imagen es muy grande (máx. 4 MB). Usa una versión más liviana.");
+      e.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => set("planoDataUrl", String(reader.result));
+    reader.readAsDataURL(file);
+  }
+
   async function handlePdf() {
     if (!docRef.current) return;
     setPdfLoading(true);
@@ -111,6 +124,7 @@ export function EditorPiscina({
       await descargarPdfMultipagina(
         docRef.current,
         toFilename(`Propuesta Piscina ${data.cliente || ""}`),
+        { footerText: "Proyectos del Agua PROASA · www.proasa.com.gt" },
       );
     } catch (err) {
       console.error(err);
@@ -255,6 +269,21 @@ export function EditorPiscina({
                 <button onClick={addCron} className="w-full rounded-md border border-dashed border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:border-teal-400 hover:text-teal-700 dark:border-zinc-700 dark:text-zinc-400">+ Agregar fila</button>
               </div>
               <Area label="Nota del cronograma" value={data.cronogramaNota} onChange={(v) => set("cronogramaNota", v)} rows={3} />
+            </Grupo>
+
+            {/* Anexo A — Plano */}
+            <Grupo titulo="Anexo A — Plano">
+              <Area label="Descripción del plano" value={data.planoTexto} onChange={(v) => set("planoTexto", v)} rows={5} />
+              <label className="block">
+                <span className="mb-1 block text-xs text-zinc-600 dark:text-zinc-400">Imagen del plano (máx. 4 MB)</span>
+                <input type="file" accept="image/*" onChange={handlePlanoFile} className="block w-full text-xs text-zinc-600 file:mr-2 file:rounded-md file:border-0 file:bg-teal-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-teal-700 dark:text-zinc-300" />
+              </label>
+              {data.planoDataUrl && (
+                <div className="flex items-center gap-3">
+                  <img src={data.planoDataUrl} alt="Plano" className="h-16 w-auto rounded border border-zinc-300" />
+                  <button onClick={() => set("planoDataUrl", "")} className="text-xs text-red-500 hover:underline">Quitar imagen</button>
+                </div>
+              )}
             </Grupo>
 
             {/* Cierre */}

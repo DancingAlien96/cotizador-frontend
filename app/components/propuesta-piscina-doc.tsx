@@ -180,6 +180,23 @@ export function PropuestaPiscinaDoc({ data }: { data: PropuestaPiscinaData }) {
           </p>
         </Seccion>
 
+        {/* Anexo A — Plano */}
+        {(data.planoTexto.trim() || data.planoDataUrl) && (
+          <section>
+            <h2 className="sec">ANEXO A — PLANO DE LA PISCINA</h2>
+            {data.planoTexto.trim() && (
+              <p className="pre text-justify">{data.planoTexto}</p>
+            )}
+            {data.planoDataUrl && (
+              <img
+                src={data.planoDataUrl}
+                alt="Plano de la piscina"
+                className="mx-auto mt-3 max-h-[520px] max-w-full border border-zinc-300"
+              />
+            )}
+          </section>
+        )}
+
         {/* Cierre */}
         <section className="mt-8 border-t-2 pt-5" style={{ borderColor: AZUL }}>
           <p className="text-justify">{data.cierreTexto}</p>

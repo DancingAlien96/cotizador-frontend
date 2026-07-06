@@ -21,11 +21,7 @@ export function CotizacionGuatecomprasDoc({
 
   return (
     <article className="cotizacion">
-      <MembreteHeader
-        logoSrc="/logopromesa.png"
-        showWordmark={false}
-        logoClass="h-16"
-      />
+      <MembreteHeader />
 
       <div className="cotizacion-body">
         {/* Datos generales */}

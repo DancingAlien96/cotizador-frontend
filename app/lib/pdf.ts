@@ -34,10 +34,13 @@ export async function descargarPdf(
   pdf.save(filename);
 }
 
-// Genera un PDF de varias páginas (tamaño carta) cortando el documento alto.
+// Genera un PDF de varias páginas (tamaño carta) reservando un pie con el
+// número de página. Cada página se recorta por separado para que el contenido
+// no invada la franja del pie.
 export async function descargarPdfMultipagina(
   element: HTMLElement,
   filename: string,
+  options: { footerText?: string } = {},
 ): Promise<void> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas-pro"),
@@ -54,21 +57,39 @@ export async function descargarPdfMultipagina(
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-  const imgData = canvas.toDataURL("image/png");
+  const footerH = 26; // franja reservada para el pie
+  const contentH = pageHeight - footerH;
+  const pxPerPt = canvas.width / pageWidth;
+  const sliceHpx = contentH * pxPerPt;
+  const totalPages = Math.max(1, Math.ceil(canvas.height / sliceHpx));
 
-  let heightLeft = imgHeight;
-  let position = 0;
+  for (let i = 0; i < totalPages; i++) {
+    const sy = i * sliceHpx;
+    const sh = Math.min(sliceHpx, canvas.height - sy);
 
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
+    const slice = document.createElement("canvas");
+    slice.width = canvas.width;
+    slice.height = sh;
+    const ctx = slice.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+    }
 
-  while (heightLeft > 0) {
-    position -= pageHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    if (i > 0) pdf.addPage();
+    pdf.addImage(slice.toDataURL("image/png"), "PNG", 0, 0, pageWidth, sh / pxPerPt);
+
+    // Pie: texto opcional a la izquierda y "Página N de M" a la derecha
+    pdf.setFontSize(8);
+    pdf.setTextColor(120);
+    if (options.footerText) {
+      pdf.text(options.footerText, 40, pageHeight - 10);
+    }
+    pdf.text(
+      `Página ${i + 1} de ${totalPages}`,
+      pageWidth - 40,
+      pageHeight - 10,
+      { align: "right" },
+    );
   }
 
   pdf.save(filename);

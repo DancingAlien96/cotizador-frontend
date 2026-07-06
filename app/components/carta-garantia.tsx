@@ -5,11 +5,7 @@ import { MembreteHeader, MembreteFooter } from "./membrete";
 export function CartaGarantia({ data }: { data: CartaData }) {
   return (
     <article className="carta">
-      <MembreteHeader
-        logoSrc="/logopromesa.png"
-        showWordmark={false}
-        logoClass="h-16"
-      />
+      <MembreteHeader />
 
       <div className="carta-body">
       <p className="mb-5">
