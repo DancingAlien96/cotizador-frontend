@@ -1,10 +1,5 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import crypto from "node:crypto";
+import { apiList, apiUpsert, apiDelete, ts, type ApiRecord } from "./api";
 import type { CartaData } from "./carta";
-
-// Persistencia simple en archivo JSON (sin base de datos).
-// Se guarda en <proyecto>/data/cotizaciones.json (ignorado por git).
 
 export type SavedCotizacion = {
   id: string;
@@ -14,28 +9,25 @@ export type SavedCotizacion = {
   updatedAt: number;
 };
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE = path.join(DATA_DIR, "cotizaciones.json");
+const TIPO = "carta";
 
-async function readAll(): Promise<SavedCotizacion[]> {
-  try {
-    const raw = await fs.readFile(FILE, "utf8");
-    const parsed = JSON.parse(raw) as SavedCotizacion[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw err;
-  }
-}
+// La carta lleva un `nombre` además de los datos; se guarda como envoltorio
+// { nombre, carta } dentro del campo `data` del backend.
+type CartaEnvelope = { nombre: string; carta: CartaData };
 
-async function writeAll(items: SavedCotizacion[]): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(items, null, 2), "utf8");
+function map(r: ApiRecord): SavedCotizacion {
+  const env = r.data as CartaEnvelope;
+  return {
+    id: r.id,
+    nombre: env?.nombre ?? "",
+    data: env?.carta ?? ({} as CartaData),
+    createdAt: ts(r.createdAt),
+    updatedAt: ts(r.updatedAt),
+  };
 }
 
 export async function listCotizaciones(): Promise<SavedCotizacion[]> {
-  const all = await readAll();
-  return all.sort((a, b) => b.updatedAt - a.updatedAt);
+  return (await apiList(TIPO)).map(map);
 }
 
 export async function upsertCotizacion(input: {
@@ -43,36 +35,10 @@ export async function upsertCotizacion(input: {
   nombre: string;
   data: CartaData;
 }): Promise<SavedCotizacion> {
-  const all = await readAll();
-  const now = Date.now();
-
-  if (input.id) {
-    const idx = all.findIndex((c) => c.id === input.id);
-    if (idx !== -1) {
-      all[idx] = {
-        ...all[idx],
-        nombre: input.nombre,
-        data: input.data,
-        updatedAt: now,
-      };
-      await writeAll(all);
-      return all[idx];
-    }
-  }
-
-  const created: SavedCotizacion = {
-    id: crypto.randomUUID(),
-    nombre: input.nombre,
-    data: input.data,
-    createdAt: now,
-    updatedAt: now,
-  };
-  all.push(created);
-  await writeAll(all);
-  return created;
+  const envelope: CartaEnvelope = { nombre: input.nombre, carta: input.data };
+  return map(await apiUpsert(TIPO, { id: input.id, data: envelope }));
 }
 
 export async function deleteCotizacion(id: string): Promise<void> {
-  const all = await readAll();
-  await writeAll(all.filter((c) => c.id !== id));
+  await apiDelete(TIPO, id);
 }

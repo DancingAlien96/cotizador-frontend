@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cotizador PROMESA — Frontend
 
-## Getting Started
+App web (Next.js 16) para generar cotizaciones de PROMESA / PROASA:
+**Tienda**, **Guatecompras** (Carta de Garantía y Cotización), **Empresas** y
+**Construcción de piscina**. Incluye login, vista previa en vivo, guardado,
+exportación a PDF e impresión.
 
-First, run the development server:
+Los datos se guardan en el **backend** (`cotizador-backend`, API + PostgreSQL).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Requisitos para correr
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Tener el **backend** corriendo (ver su README): contenedor de PostgreSQL +
+   `npm run dev`, escuchando en `http://localhost:4000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Crear `.env.local` con:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```dotenv
+   APP_PASSWORD=cotizador2026
+   SESSION_SECRET=<secreto largo y aleatorio para firmar la cookie>
+   BACKEND_URL=http://localhost:4000
+   ```
 
-## Learn More
+   `APP_PASSWORD` debe coincidir con la del backend (el frontend la usa para
+   autenticarse contra la API).
 
-To learn more about Next.js, take a look at the following resources:
+3. Instalar y arrancar:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   App en `http://localhost:3000`. Ingresa con `APP_PASSWORD`.
 
-## Deploy on Vercel
+## Estructura
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/login`, `proxy.ts`, `app/lib/session.ts` — autenticación y protección de rutas.
+- `app/lib/api.ts` — cliente del backend.
+- `app/lib/store-*.ts` — capa de datos (llama a la API).
+- `app/components/editor-*.tsx` y `*-doc.tsx` — editores y documentos por tipo.
+- `app/lib/pdf.ts` — exportación a PDF (una página y multipágina).
