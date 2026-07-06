@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   piscinaDefaults,
   totalConIva,
@@ -20,8 +20,10 @@ const input =
 
 export function EditorPiscina({
   initialCotizaciones,
+  initialSelectedId,
 }: {
   initialCotizaciones: SavedPiscina[];
+  initialSelectedId?: string;
 }) {
   const [data, setData] = useState<PropuestaPiscinaData>(piscinaDefaults);
   const [saved, setSaved] = useState<SavedPiscina[]>(initialCotizaciones);
@@ -89,6 +91,13 @@ export function EditorPiscina({
     setData(item.data);
     setCurrentId(item.id);
   }
+
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
+    if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function handleGuardar() {
     startTransition(async () => {
       const res = await savePiscina({ id: currentId, data });

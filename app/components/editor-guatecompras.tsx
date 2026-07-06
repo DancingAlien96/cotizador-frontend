@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   guatecomprasDefaults,
   type CotizacionGuatecomprasData,
@@ -22,8 +22,10 @@ const inputClass =
 
 export function EditorGuatecompras({
   initialCotizaciones,
+  initialSelectedId,
 }: {
   initialCotizaciones: SavedGuatecompras[];
+  initialSelectedId?: string;
 }) {
   const [data, setData] = useState<CotizacionGuatecomprasData>(
     guatecomprasDefaults,
@@ -89,6 +91,13 @@ export function EditorGuatecompras({
     setData(item.data);
     setCurrentId(item.id);
   }
+
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
+    if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function handleGuardar() {
     startTransition(async () => {
       const res = await saveGuatecompras({ id: currentId, data });

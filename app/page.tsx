@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "./lib/session";
+import { apiHistorial, type HistorialItem } from "./lib/api";
 import { AppHeader } from "./components/app-header";
+import { HistorialGlobal } from "./components/historial-global";
 
 type Categoria = {
   href: string;
@@ -58,6 +60,13 @@ export default async function Home() {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  let historial: { items: HistorialItem[]; total: number } = { items: [], total: 0 };
+  try {
+    historial = await apiHistorial({ limit: 20, offset: 0 });
+  } catch {
+    // Si el backend no responde, mostramos el historial vacío.
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-100 dark:bg-zinc-950">
       <AppHeader />
@@ -102,6 +111,8 @@ export default async function Home() {
             </Link>
           ))}
         </div>
+
+        <HistorialGlobal initial={historial} />
       </main>
     </div>
   );

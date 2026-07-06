@@ -64,14 +64,44 @@ export function apiNextNumero(tipo: string): Promise<{ numero: string }> {
   );
 }
 
+export type Resumen = {
+  cliente?: string | null;
+  total?: number | null;
+  fecha?: string | null;
+};
+
 export function apiUpsert(
   tipo: string,
-  body: { id?: string | null; data: unknown },
+  body: { id?: string | null; data: unknown } & Resumen,
 ): Promise<ApiRecord> {
   return request<ApiRecord>(`/api/cotizaciones/${safeTipo(tipo)}`, {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export type HistorialItem = {
+  id: string;
+  tipo: string;
+  numero: string | null;
+  cliente: string | null;
+  total: number | null;
+  fecha: string | null;
+  updatedAt: string;
+};
+
+export function apiHistorial(params: {
+  tipo?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ items: HistorialItem[]; total: number; limit: number; offset: number }> {
+  const sp = new URLSearchParams();
+  if (params.tipo) sp.set("tipo", params.tipo);
+  if (params.q) sp.set("q", params.q);
+  if (params.limit != null) sp.set("limit", String(params.limit));
+  if (params.offset != null) sp.set("offset", String(params.offset));
+  return request(`/api/historial?${sp.toString()}`);
 }
 
 export function apiDelete(tipo: string, id: string): Promise<void> {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   tiendaDefaults,
   totalItemTienda,
@@ -20,8 +20,10 @@ const inputClass =
 
 export function EditorTienda({
   initialCotizaciones,
+  initialSelectedId,
 }: {
   initialCotizaciones: SavedTienda[];
+  initialSelectedId?: string;
 }) {
   const [data, setData] = useState<CotizacionTiendaData>(tiendaDefaults);
   const [saved, setSaved] = useState<SavedTienda[]>(initialCotizaciones);
@@ -85,6 +87,13 @@ export function EditorTienda({
     setData(item.data);
     setCurrentId(item.id);
   }
+
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
+    if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function handleGuardar() {
     startTransition(async () => {
       const res = await saveTienda({ id: currentId, data });

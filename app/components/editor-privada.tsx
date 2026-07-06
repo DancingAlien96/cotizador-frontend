@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   cotizacionPrivadaDefaults,
   totalItem,
@@ -21,9 +21,11 @@ const inputClass =
 export function EditorPrivada({
   initialCotizaciones,
   siguienteNumero,
+  initialSelectedId,
 }: {
   initialCotizaciones: SavedCotizacionPrivada[];
   siguienteNumero: string;
+  initialSelectedId?: string;
 }) {
   const [data, setData] = useState<CotizacionPrivadaData>(
     cotizacionPrivadaDefaults,
@@ -95,6 +97,14 @@ export function EditorPrivada({
     setCurrentId(item.id);
     setNumero(item.numero);
   }
+
+  // Abrir una cotización específica al llegar desde el historial (?id=…).
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
+    if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   function handleGuardar() {
     startTransition(async () => {
       const res = await savePrivada({ id: currentId, data });

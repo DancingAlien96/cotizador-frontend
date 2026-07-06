@@ -1,5 +1,6 @@
 import { apiList, apiUpsert, apiDelete, ts, type ApiRecord } from "./api";
 import type { CotizacionGuatecomprasData } from "./cotizacion-guatecompras";
+import { totalGeneral } from "./cotizacion-privada";
 
 export type SavedGuatecompras = {
   id: string;
@@ -27,7 +28,15 @@ export async function upsertGuatecompras(input: {
   id?: string | null;
   data: CotizacionGuatecomprasData;
 }): Promise<SavedGuatecompras> {
-  return map(await apiUpsert(TIPO, { id: input.id, data: input.data }));
+  return map(
+    await apiUpsert(TIPO, {
+      id: input.id,
+      data: input.data,
+      cliente: input.data.cotizacionA,
+      total: totalGeneral(input.data.items),
+      fecha: input.data.fecha,
+    }),
+  );
 }
 
 export async function deleteGuatecompras(id: string): Promise<void> {

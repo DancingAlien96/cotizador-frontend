@@ -36,7 +36,14 @@ export async function upsertCotizacion(input: {
   data: CartaData;
 }): Promise<SavedCotizacion> {
   const envelope: CartaEnvelope = { nombre: input.nombre, carta: input.data };
-  return map(await apiUpsert(TIPO, { id: input.id, data: envelope }));
+  return map(
+    await apiUpsert(TIPO, {
+      id: input.id,
+      data: envelope,
+      cliente: input.data.institucion || input.nombre,
+      fecha: input.data.fecha,
+    }),
+  );
 }
 
 export async function deleteCotizacion(id: string): Promise<void> {

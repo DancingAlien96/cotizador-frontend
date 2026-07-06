@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { cartaDefaults, cartaFields, type CartaData } from "../lib/carta";
 import type { SavedCotizacion } from "../lib/store";
 import { CartaGarantia } from "./carta-garantia";
@@ -29,9 +29,11 @@ function formatFecha(ts: number): string {
 export function Editor({
   initialCotizaciones,
   backHref = "/",
+  initialSelectedId,
 }: {
   initialCotizaciones: SavedCotizacion[];
   backHref?: string;
+  initialSelectedId?: string;
 }) {
   const [data, setData] = useState<CartaData>(cartaDefaults);
   const [saved, setSaved] = useState<SavedCotizacion[]>(initialCotizaciones);
@@ -70,6 +72,13 @@ export function Editor({
     setCurrentId(item.id);
     setNombre(item.nombre);
   }
+
+  useEffect(() => {
+    if (!initialSelectedId) return;
+    const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
+    if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleGuardar() {
     const nombreFinal = nombre.trim() || defaultNombre(data);

@@ -1,5 +1,8 @@
 import { apiList, apiUpsert, apiDelete, ts, type ApiRecord } from "./api";
-import type { PropuestaPiscinaData } from "./propuesta-piscina";
+import {
+  totalConIva,
+  type PropuestaPiscinaData,
+} from "./propuesta-piscina";
 
 export type SavedPiscina = {
   id: string;
@@ -27,7 +30,15 @@ export async function upsertPiscina(input: {
   id?: string | null;
   data: PropuestaPiscinaData;
 }): Promise<SavedPiscina> {
-  return map(await apiUpsert(TIPO, { id: input.id, data: input.data }));
+  return map(
+    await apiUpsert(TIPO, {
+      id: input.id,
+      data: input.data,
+      cliente: input.data.cliente,
+      total: totalConIva(input.data.subtotalOp2),
+      fecha: input.data.fechaEmision,
+    }),
+  );
 }
 
 export async function deletePiscina(id: string): Promise<void> {

@@ -6,7 +6,7 @@ import {
   ts,
   type ApiRecord,
 } from "./api";
-import type { CotizacionPrivadaData } from "./cotizacion-privada";
+import { totalGeneral, type CotizacionPrivadaData } from "./cotizacion-privada";
 
 // Nota: este store corresponde a "Cotizaciones de empresas" (tipo `empresas`
 // en el backend), con folio autogenerado.
@@ -43,7 +43,15 @@ export async function upsertPrivada(input: {
   id?: string | null;
   data: CotizacionPrivadaData;
 }): Promise<{ saved: SavedCotizacionPrivada; siguienteNumero: string }> {
-  const saved = map(await apiUpsert(TIPO, { id: input.id, data: input.data }));
+  const saved = map(
+    await apiUpsert(TIPO, {
+      id: input.id,
+      data: input.data,
+      cliente: input.data.clienteNombre,
+      total: totalGeneral(input.data.items),
+      fecha: input.data.fecha,
+    }),
+  );
   const siguienteNumero = await peekNextNumero();
   return { saved, siguienteNumero };
 }
