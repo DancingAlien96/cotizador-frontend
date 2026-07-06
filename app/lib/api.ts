@@ -2,6 +2,8 @@
 // (Server Actions / Server Components). Obtiene un token con la contraseña
 // compartida y lo cachea en memoria del proceso.
 
+import { getSessionToken } from "./session";
+
 const BASE = process.env.BACKEND_URL || "http://localhost:4000";
 
 // Tipos de cotización válidos (allowlist para los segmentos de ruta).
@@ -26,34 +28,15 @@ export type ApiRecord = {
   updatedAt: string;
 };
 
-let cachedToken: string | null = null;
-
-async function getToken(): Promise<string> {
-  if (cachedToken) return cachedToken;
-  const password = process.env.APP_PASSWORD;
-  if (!password) {
-    throw new Error("Falta APP_PASSWORD para autenticar contra el backend.");
-  }
-  const res = await fetch(`${BASE}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password }),
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new Error(`No se pudo autenticar contra el backend (${res.status}).`);
-  }
-  const { token } = (await res.json()) as { token: string };
-  cachedToken = token;
-  return token;
-}
-
+// Usa el JWT del usuario (cookie de sesión) para llamar a la API.
 async function request<T>(
   path: string,
   options: RequestInit = {},
-  retry = true,
 ): Promise<T> {
-  const token = await getToken();
+  const token = await getSessionToken();
+  if (!token) {
+    throw new Error("No autenticado.");
+  }
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers: {
@@ -64,10 +47,6 @@ async function request<T>(
     cache: "no-store",
   });
 
-  if (res.status === 401 && retry) {
-    cachedToken = null;
-    return request<T>(path, options, false);
-  }
   if (!res.ok) {
     throw new Error(`Backend respondió ${res.status} en ${path}`);
   }

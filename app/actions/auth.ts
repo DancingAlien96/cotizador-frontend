@@ -1,20 +1,38 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { setSession, clearSession } from "../lib/session";
+import { setSessionToken, clearSession } from "../lib/session";
+
+const BACKEND = process.env.BACKEND_URL || "http://localhost:4000";
 
 export async function login(
   _prev: string | undefined,
   formData: FormData,
 ): Promise<string | undefined> {
+  const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const expected = process.env.APP_PASSWORD || "cotizador2026";
 
-  if (!password || password !== expected) {
-    return "Contraseña incorrecta.";
+  if (!email || !password) {
+    return "Ingresa tu correo y contraseña.";
   }
 
-  await setSession("admin");
+  let token: string;
+  try {
+    const res = await fetch(`${BACKEND}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return "Credenciales inválidas.";
+    }
+    token = (await res.json()).token;
+  } catch {
+    return "No se pudo conectar con el servidor. Intenta más tarde.";
+  }
+
+  await setSessionToken(token);
   redirect("/");
 }
 
