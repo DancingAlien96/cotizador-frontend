@@ -3,7 +3,19 @@
 // compartida y lo cachea en memoria del proceso.
 
 const BASE = process.env.BACKEND_URL || "http://localhost:4000";
-const PASSWORD = process.env.APP_PASSWORD || "cotizador2026";
+
+// Tipos de cotización válidos (allowlist para los segmentos de ruta).
+const TIPOS = new Set(["tienda", "guatecompras", "empresas", "carta", "piscina"]);
+
+function safeTipo(tipo: string): string {
+  if (!TIPOS.has(tipo)) throw new Error(`Tipo de cotización inválido: ${tipo}`);
+  return tipo;
+}
+
+function safeId(id: string): string {
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) throw new Error("Identificador inválido.");
+  return id;
+}
 
 export type ApiRecord = {
   id: string;
@@ -18,10 +30,14 @@ let cachedToken: string | null = null;
 
 async function getToken(): Promise<string> {
   if (cachedToken) return cachedToken;
+  const password = process.env.APP_PASSWORD;
+  if (!password) {
+    throw new Error("Falta APP_PASSWORD para autenticar contra el backend.");
+  }
   const res = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: PASSWORD }),
+    body: JSON.stringify({ password }),
     cache: "no-store",
   });
   if (!res.ok) {
@@ -60,25 +76,30 @@ async function request<T>(
 }
 
 export function apiList(tipo: string): Promise<ApiRecord[]> {
-  return request<ApiRecord[]>(`/api/cotizaciones/${tipo}`);
+  return request<ApiRecord[]>(`/api/cotizaciones/${safeTipo(tipo)}`);
 }
 
 export function apiNextNumero(tipo: string): Promise<{ numero: string }> {
-  return request<{ numero: string }>(`/api/cotizaciones/${tipo}/next-numero`);
+  return request<{ numero: string }>(
+    `/api/cotizaciones/${safeTipo(tipo)}/next-numero`,
+  );
 }
 
 export function apiUpsert(
   tipo: string,
   body: { id?: string | null; data: unknown },
 ): Promise<ApiRecord> {
-  return request<ApiRecord>(`/api/cotizaciones/${tipo}`, {
+  return request<ApiRecord>(`/api/cotizaciones/${safeTipo(tipo)}`, {
     method: "POST",
     body: JSON.stringify(body),
   });
 }
 
 export function apiDelete(tipo: string, id: string): Promise<void> {
-  return request<void>(`/api/cotizaciones/${tipo}/${id}`, { method: "DELETE" });
+  return request<void>(
+    `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}`,
+    { method: "DELETE" },
+  );
 }
 
 export function ts(iso: string): number {
