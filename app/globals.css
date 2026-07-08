@@ -197,6 +197,16 @@ body {
     display: none !important;
   }
 
+  /* Neutraliza el escalado de la vista previa al imprimir */
+  .preview-scaler {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .preview-scaled {
+    transform: none !important;
+    margin-left: 0 !important;
+  }
+
   body {
     background: #ffffff;
   }

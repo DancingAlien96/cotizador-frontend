@@ -10,6 +10,7 @@ import { saveCotizacion, removeCotizacion } from "../actions/cotizaciones";
 import { descargarPdf, toFilename } from "../lib/pdf";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
+import { PreviewScaler } from "./preview-scaler";
 
 function defaultNombre(data: CartaData): string {
   const inst = data.institucion.trim();
@@ -297,9 +298,11 @@ export function Editor({
 
         {/* Vista previa */}
         <main className="flex-1 overflow-y-auto p-4 lg:h-[calc(100vh-57px)] lg:p-8">
-          <div id="print-area" ref={cartaRef} className="mx-auto">
-            <CartaGarantia data={data} />
-          </div>
+          <PreviewScaler>
+            <div id="print-area" ref={cartaRef}>
+              <CartaGarantia data={data} />
+            </div>
+          </PreviewScaler>
         </main>
       </div>
     </div>

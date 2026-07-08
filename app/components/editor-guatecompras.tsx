@@ -18,6 +18,7 @@ import { saveGuatecompras, removeGuatecompras } from "../actions/guatecompras";
 import { descargarPdf, toFilename } from "../lib/pdf";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
+import { PreviewScaler } from "./preview-scaler";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -354,9 +355,11 @@ export function EditorGuatecompras({
 
         {/* Vista previa */}
         <main className="flex-1 overflow-y-auto p-4 lg:h-[calc(100vh-57px)] lg:p-8">
-          <div id="print-area" ref={docRef} className="mx-auto">
-            <CotizacionGuatecomprasDoc data={data} />
-          </div>
+          <PreviewScaler>
+            <div id="print-area" ref={docRef}>
+              <CotizacionGuatecomprasDoc data={data} />
+            </div>
+          </PreviewScaler>
         </main>
       </div>
     </div>
