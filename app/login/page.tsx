@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { login } from "../actions/auth";
-import { PromesaLogo } from "../components/promesa-logo";
 
 export default function LoginPage() {
   const [error, action, pending] = useActionState(login, undefined);
@@ -14,7 +13,13 @@ export default function LoginPage() {
         className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
       >
         <div className="mb-6 flex flex-col items-center gap-2">
-          <PromesaLogo className="h-12" />
+          <span className="flex items-center rounded-xl bg-teal-600 px-3 py-2">
+            <img
+              src="/logocotizacionprivada.png"
+              alt="PROMESA"
+              className="h-11 w-auto"
+            />
+          </span>
           <h1 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
             Cotizador PROMESA
           </h1>
