@@ -14,6 +14,8 @@ import type { SavedCotizacionPrivada } from "../lib/store-privadas";
 import { CotizacionPrivadaDoc } from "./cotizacion-privada-doc";
 import { savePrivada, removePrivada } from "../actions/privadas";
 import { descargarPdf, toFilename } from "../lib/pdf";
+import { useDraft } from "../lib/use-draft";
+import { DraftBanner } from "./draft-banner";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -39,6 +41,19 @@ export function EditorPrivada({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  const { draft, canRestore, clear: clearDraft } = useDraft("empresas", {
+    data,
+    currentId,
+    numero,
+  });
+  function restaurarBorrador() {
+    if (!draft) return;
+    setData(draft.snapshot.data);
+    setCurrentId(draft.snapshot.currentId);
+    setNumero(draft.snapshot.numero);
+    clearDraft();
+  }
 
   function set<K extends keyof CotizacionPrivadaData>(
     key: K,
@@ -91,6 +106,7 @@ export function EditorPrivada({
     setData(cotizacionPrivadaDefaults);
     setCurrentId(null);
     setNumero(proximoNumero);
+    clearDraft();
   }
   function handleCargar(item: SavedCotizacionPrivada) {
     setData(item.data);
@@ -112,6 +128,7 @@ export function EditorPrivada({
       setCurrentId(res.saved.id);
       setNumero(res.saved.numero);
       setProximoNumero(res.siguienteNumero);
+      clearDraft();
     });
   }
   function handleEliminar(id: string) {
@@ -174,6 +191,10 @@ export function EditorPrivada({
           </button>
         </div>
       </header>
+
+      {canRestore && (
+        <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
 
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario */}

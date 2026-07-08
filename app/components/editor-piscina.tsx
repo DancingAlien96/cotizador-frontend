@@ -14,6 +14,8 @@ import type { SavedPiscina } from "../lib/store-piscina";
 import { PropuestaPiscinaDoc } from "./propuesta-piscina-doc";
 import { savePiscina, removePiscina } from "../actions/piscina";
 import { descargarPdfMultipagina, toFilename } from "../lib/pdf";
+import { useDraft } from "../lib/use-draft";
+import { DraftBanner } from "./draft-banner";
 
 const input =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -31,6 +33,17 @@ export function EditorPiscina({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  const { draft, canRestore, clear: clearDraft } = useDraft("piscina", {
+    data,
+    currentId,
+  });
+  function restaurarBorrador() {
+    if (!draft) return;
+    setData(draft.snapshot.data);
+    setCurrentId(draft.snapshot.currentId);
+    clearDraft();
+  }
 
   function set<K extends keyof PropuestaPiscinaData>(
     key: K,
@@ -86,6 +99,7 @@ export function EditorPiscina({
   function handleNueva() {
     setData(piscinaDefaults);
     setCurrentId(null);
+    clearDraft();
   }
   function handleCargar(item: SavedPiscina) {
     setData(item.data);
@@ -103,6 +117,7 @@ export function EditorPiscina({
       const res = await savePiscina({ id: currentId, data });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      clearDraft();
     });
   }
   function handleEliminar(id: string) {
@@ -163,6 +178,10 @@ export function EditorPiscina({
           </button>
         </div>
       </header>
+
+      {canRestore && (
+        <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
 
       <div className="flex flex-1 flex-col lg:flex-row">
         <aside className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-[28rem] lg:border-b-0 lg:border-r">

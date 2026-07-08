@@ -16,6 +16,8 @@ import type { SavedGuatecompras } from "../lib/store-guatecompras";
 import { CotizacionGuatecomprasDoc } from "./cotizacion-guatecompras-doc";
 import { saveGuatecompras, removeGuatecompras } from "../actions/guatecompras";
 import { descargarPdf, toFilename } from "../lib/pdf";
+import { useDraft } from "../lib/use-draft";
+import { DraftBanner } from "./draft-banner";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -35,6 +37,17 @@ export function EditorGuatecompras({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  const { draft, canRestore, clear: clearDraft } = useDraft("guatecompras", {
+    data,
+    currentId,
+  });
+  function restaurarBorrador() {
+    if (!draft) return;
+    setData(draft.snapshot.data);
+    setCurrentId(draft.snapshot.currentId);
+    clearDraft();
+  }
 
   function set<K extends keyof CotizacionGuatecomprasData>(
     key: K,
@@ -86,6 +99,7 @@ export function EditorGuatecompras({
   function handleNueva() {
     setData(guatecomprasDefaults);
     setCurrentId(null);
+    clearDraft();
   }
   function handleCargar(item: SavedGuatecompras) {
     setData(item.data);
@@ -103,6 +117,7 @@ export function EditorGuatecompras({
       const res = await saveGuatecompras({ id: currentId, data });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      clearDraft();
     });
   }
   function handleEliminar(id: string) {
@@ -162,6 +177,10 @@ export function EditorGuatecompras({
           </button>
         </div>
       </header>
+
+      {canRestore && (
+        <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
 
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario */}

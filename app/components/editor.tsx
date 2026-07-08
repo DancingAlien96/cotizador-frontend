@@ -8,6 +8,8 @@ import { CartaGarantia } from "./carta-garantia";
 import { logout } from "../actions/auth";
 import { saveCotizacion, removeCotizacion } from "../actions/cotizaciones";
 import { descargarPdf, toFilename } from "../lib/pdf";
+import { useDraft } from "../lib/use-draft";
+import { DraftBanner } from "./draft-banner";
 
 function defaultNombre(data: CartaData): string {
   const inst = data.institucion.trim();
@@ -43,6 +45,19 @@ export function Editor({
   const [pdfLoading, setPdfLoading] = useState(false);
   const cartaRef = useRef<HTMLDivElement>(null);
 
+  const { draft, canRestore, clear: clearDraft } = useDraft("carta", {
+    data,
+    currentId,
+    nombre,
+  });
+  function restaurarBorrador() {
+    if (!draft) return;
+    setData(draft.snapshot.data);
+    setCurrentId(draft.snapshot.currentId);
+    setNombre(draft.snapshot.nombre);
+    clearDraft();
+  }
+
   function update(name: keyof CartaData, value: string) {
     setData((prev) => ({ ...prev, [name]: value }));
   }
@@ -65,6 +80,7 @@ export function Editor({
     setData(cartaDefaults);
     setCurrentId(null);
     setNombre("");
+    clearDraft();
   }
 
   function handleCargar(item: SavedCotizacion) {
@@ -91,6 +107,7 @@ export function Editor({
       setSaved(all);
       setCurrentId(item.id);
       setNombre(item.nombre);
+      clearDraft();
     });
   }
 
@@ -142,6 +159,10 @@ export function Editor({
           </form>
         </div>
       </header>
+
+      {canRestore && (
+        <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
 
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario + cotizaciones */}

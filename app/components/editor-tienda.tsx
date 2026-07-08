@@ -14,6 +14,8 @@ import type { SavedTienda } from "../lib/store-tienda";
 import { CotizacionTiendaDoc } from "./cotizacion-tienda-doc";
 import { saveTienda, removeTienda } from "../actions/tienda";
 import { descargarPdf, toFilename } from "../lib/pdf";
+import { useDraft } from "../lib/use-draft";
+import { DraftBanner } from "./draft-banner";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -31,6 +33,17 @@ export function EditorTienda({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  const { draft, canRestore, clear: clearDraft } = useDraft("tienda", {
+    data,
+    currentId,
+  });
+  function restaurarBorrador() {
+    if (!draft) return;
+    setData(draft.snapshot.data);
+    setCurrentId(draft.snapshot.currentId);
+    clearDraft();
+  }
 
   function set<K extends keyof CotizacionTiendaData>(
     key: K,
@@ -82,6 +95,7 @@ export function EditorTienda({
   function handleNueva() {
     setData(tiendaDefaults);
     setCurrentId(null);
+    clearDraft();
   }
   function handleCargar(item: SavedTienda) {
     setData(item.data);
@@ -99,6 +113,7 @@ export function EditorTienda({
       const res = await saveTienda({ id: currentId, data });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      clearDraft();
     });
   }
   function handleEliminar(id: string) {
@@ -148,6 +163,10 @@ export function EditorTienda({
           </button>
         </div>
       </header>
+
+      {canRestore && (
+        <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
 
       <div className="flex flex-1 flex-col lg:flex-row">
         <aside className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-[26rem] lg:border-b-0 lg:border-r">
