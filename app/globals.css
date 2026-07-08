@@ -231,7 +231,8 @@ body {
   .cotizacion {
     box-shadow: none;
     max-width: none;
-    min-height: auto;
+    /* Ocupa exactamente una página para que el pie del membrete quede abajo */
+    min-height: 100vh;
     margin: 0;
   }
 }
