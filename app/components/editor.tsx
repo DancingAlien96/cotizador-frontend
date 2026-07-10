@@ -11,6 +11,7 @@ import { descargarPdf, toFilename } from "../lib/pdf";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
+import { SaveDialog } from "./save-dialog";
 
 function defaultNombre(data: CartaData): string {
   const inst = data.institucion.trim();
@@ -33,15 +34,19 @@ export function Editor({
   initialCotizaciones,
   backHref = "/",
   initialSelectedId,
+  userEmail = "",
 }: {
   initialCotizaciones: SavedCotizacion[];
   backHref?: string;
   initialSelectedId?: string;
+  userEmail?: string;
 }) {
   const [data, setData] = useState<CartaData>(cartaDefaults);
   const [saved, setSaved] = useState<SavedCotizacion[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [nombre, setNombre] = useState("");
+  const [autor, setAutor] = useState(userEmail);
+  const [saveOpen, setSaveOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const cartaRef = useRef<HTMLDivElement>(null);
@@ -50,12 +55,14 @@ export function Editor({
     data,
     currentId,
     nombre,
+    autor,
   });
   function restaurarBorrador() {
     if (!draft) return;
     setData(draft.snapshot.data);
     setCurrentId(draft.snapshot.currentId);
     setNombre(draft.snapshot.nombre);
+    setAutor(draft.snapshot.autor ?? userEmail);
     clearDraft();
   }
 
@@ -81,6 +88,7 @@ export function Editor({
     setData(cartaDefaults);
     setCurrentId(null);
     setNombre("");
+    setAutor(userEmail);
     clearDraft();
   }
 
@@ -88,6 +96,7 @@ export function Editor({
     setData(item.data);
     setCurrentId(item.id);
     setNombre(item.nombre);
+    setAutor(item.autor || userEmail);
   }
 
   useEffect(() => {
@@ -97,18 +106,22 @@ export function Editor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleGuardar() {
-    const nombreFinal = nombre.trim() || defaultNombre(data);
+  function doGuardar(nombreVal: string, autorVal: string) {
+    const nombreFinal = nombreVal.trim() || defaultNombre(data);
+    setNombre(nombreFinal);
+    setAutor(autorVal);
     startTransition(async () => {
       const { saved: item, all } = await saveCotizacion({
         id: currentId,
         nombre: nombreFinal,
+        autor: autorVal,
         data,
       });
       setSaved(all);
       setCurrentId(item.id);
       setNombre(item.nombre);
       clearDraft();
+      setSaveOpen(false);
     });
   }
 
@@ -165,6 +178,16 @@ export function Editor({
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
       )}
 
+      {saveOpen && (
+        <SaveDialog
+          initialNombre={nombre || defaultNombre(data)}
+          initialAutor={autor || userEmail}
+          saving={isPending}
+          onConfirm={doGuardar}
+          onCancel={() => setSaveOpen(false)}
+        />
+      )}
+
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario + cotizaciones */}
         <aside className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-96 lg:border-b-0 lg:border-r">
@@ -182,25 +205,19 @@ export function Editor({
                 )}
               </div>
 
-              <input
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder={defaultNombre(data)}
-                autoComplete="off"
-                className="mb-2 w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-              />
+              {nombre && (
+                <p className="mb-2 truncate text-sm text-zinc-600 dark:text-zinc-300">
+                  {nombre}
+                </p>
+              )}
 
               <div className="flex gap-2">
                 <button
-                  onClick={handleGuardar}
+                  onClick={() => setSaveOpen(true)}
                   disabled={isPending}
                   className="flex-1 rounded-md bg-teal-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
                 >
-                  {isPending
-                    ? "Guardando…"
-                    : currentId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                  {currentId ? "Guardar cambios" : "Guardar"}
                 </button>
                 <button
                   onClick={handleNueva}

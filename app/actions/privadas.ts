@@ -17,6 +17,8 @@ async function requireAuth() {
 
 export async function savePrivada(input: {
   id?: string | null;
+  nombre?: string;
+  autor?: string;
   data: CotizacionPrivadaData;
 }): Promise<{
   saved: SavedCotizacionPrivada;

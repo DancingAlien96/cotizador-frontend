@@ -16,6 +16,8 @@ async function requireAuth() {
 
 export async function savePiscina(input: {
   id?: string | null;
+  nombre?: string;
+  autor?: string;
   data: PropuestaPiscinaData;
 }): Promise<{ saved: SavedPiscina; all: SavedPiscina[] }> {
   await requireAuth();

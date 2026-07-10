@@ -96,7 +96,8 @@ export function HistorialGlobal({
           <thead>
             <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800">
               <th className="px-4 py-2.5 font-medium">Tipo</th>
-              <th className="px-4 py-2.5 font-medium">Cliente</th>
+              <th className="px-4 py-2.5 font-medium">Nombre / Cliente</th>
+              <th className="px-4 py-2.5 font-medium">Autor</th>
               <th className="px-4 py-2.5 font-medium">No.</th>
               <th className="px-4 py-2.5 text-right font-medium">Total</th>
               <th className="px-4 py-2.5 font-medium">Fecha</th>
@@ -120,8 +121,18 @@ export function HistorialGlobal({
                       {info.label}
                     </span>
                   </td>
-                  <td className="max-w-xs truncate px-4 py-2.5 text-zinc-800 dark:text-zinc-100">
-                    {it.cliente || "—"}
+                  <td className="max-w-xs px-4 py-2.5">
+                    <span className="block truncate text-zinc-800 dark:text-zinc-100">
+                      {it.nombre || it.cliente || "—"}
+                    </span>
+                    {it.nombre && it.cliente && (
+                      <span className="block truncate text-[11px] text-zinc-400">
+                        {it.cliente}
+                      </span>
+                    )}
+                  </td>
+                  <td className="max-w-[10rem] truncate px-4 py-2.5 text-zinc-500">
+                    {it.autor || "—"}
                   </td>
                   <td className="px-4 py-2.5 text-zinc-500">{it.numero || "—"}</td>
                   <td className="px-4 py-2.5 text-right text-zinc-700 dark:text-zinc-300">
@@ -141,7 +152,7 @@ export function HistorialGlobal({
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-zinc-400">
+                <td colSpan={7} className="px-4 py-10 text-center text-zinc-400">
                   No hay cotizaciones que coincidan.
                 </td>
               </tr>

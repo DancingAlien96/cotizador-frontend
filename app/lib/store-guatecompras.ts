@@ -4,6 +4,8 @@ import { totalGeneral } from "./cotizacion-privada";
 
 export type SavedGuatecompras = {
   id: string;
+  nombre: string;
+  autor: string;
   data: CotizacionGuatecomprasData;
   createdAt: number;
   updatedAt: number;
@@ -14,6 +16,8 @@ const TIPO = "guatecompras";
 function map(r: ApiRecord): SavedGuatecompras {
   return {
     id: r.id,
+    nombre: r.nombre ?? "",
+    autor: r.autor ?? "",
     data: r.data as CotizacionGuatecomprasData,
     createdAt: ts(r.createdAt),
     updatedAt: ts(r.updatedAt),
@@ -26,12 +30,16 @@ export async function listGuatecompras(): Promise<SavedGuatecompras[]> {
 
 export async function upsertGuatecompras(input: {
   id?: string | null;
+  nombre?: string;
+  autor?: string;
   data: CotizacionGuatecomprasData;
 }): Promise<SavedGuatecompras> {
   return map(
     await apiUpsert(TIPO, {
       id: input.id,
       data: input.data,
+      nombre: input.nombre,
+      autor: input.autor,
       cliente: input.data.cotizacionA,
       total: totalGeneral(input.data.items),
       fecha: input.data.fecha,

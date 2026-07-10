@@ -19,6 +19,7 @@ import { descargarPdf, toFilename } from "../lib/pdf";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
+import { SaveDialog } from "./save-dialog";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -26,15 +27,20 @@ const inputClass =
 export function EditorGuatecompras({
   initialCotizaciones,
   initialSelectedId,
+  userEmail = "",
 }: {
   initialCotizaciones: SavedGuatecompras[];
   initialSelectedId?: string;
+  userEmail?: string;
 }) {
   const [data, setData] = useState<CotizacionGuatecomprasData>(
     guatecomprasDefaults,
   );
   const [saved, setSaved] = useState<SavedGuatecompras[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [nombre, setNombre] = useState("");
+  const [autor, setAutor] = useState(userEmail);
+  const [saveOpen, setSaveOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
@@ -42,11 +48,15 @@ export function EditorGuatecompras({
   const { draft, canRestore, clear: clearDraft } = useDraft("guatecompras", {
     data,
     currentId,
+    nombre,
+    autor,
   });
   function restaurarBorrador() {
     if (!draft) return;
     setData(draft.snapshot.data);
     setCurrentId(draft.snapshot.currentId);
+    setNombre(draft.snapshot.nombre ?? "");
+    setAutor(draft.snapshot.autor ?? userEmail);
     clearDraft();
   }
 
@@ -100,11 +110,15 @@ export function EditorGuatecompras({
   function handleNueva() {
     setData(guatecomprasDefaults);
     setCurrentId(null);
+    setNombre("");
+    setAutor(userEmail);
     clearDraft();
   }
   function handleCargar(item: SavedGuatecompras) {
     setData(item.data);
     setCurrentId(item.id);
+    setNombre(item.nombre);
+    setAutor(item.autor || userEmail);
   }
 
   useEffect(() => {
@@ -113,12 +127,20 @@ export function EditorGuatecompras({
     if (item) handleCargar(item);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  function handleGuardar() {
+  function doGuardar(nombreVal: string, autorVal: string) {
+    setNombre(nombreVal);
+    setAutor(autorVal);
     startTransition(async () => {
-      const res = await saveGuatecompras({ id: currentId, data });
+      const res = await saveGuatecompras({
+        id: currentId,
+        nombre: nombreVal,
+        autor: autorVal,
+        data,
+      });
       setSaved(res.all);
       setCurrentId(res.saved.id);
       clearDraft();
+      setSaveOpen(false);
     });
   }
   function handleEliminar(id: string) {
@@ -183,6 +205,16 @@ export function EditorGuatecompras({
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
       )}
 
+      {saveOpen && (
+        <SaveDialog
+          initialNombre={nombre || `Guatecompras — ${data.numeroOperacion}`.trim()}
+          initialAutor={autor || userEmail}
+          saving={isPending}
+          onConfirm={doGuardar}
+          onCancel={() => setSaveOpen(false)}
+        />
+      )}
+
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario */}
         <aside className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-[26rem] lg:border-b-0 lg:border-r">
@@ -199,15 +231,11 @@ export function EditorGuatecompras({
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={handleGuardar}
+                  onClick={() => setSaveOpen(true)}
                   disabled={isPending}
                   className="flex-1 rounded-md bg-teal-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
                 >
-                  {isPending
-                    ? "Guardando…"
-                    : currentId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                  {currentId ? "Guardar cambios" : "Guardar"}
                 </button>
                 <button
                   onClick={handleNueva}

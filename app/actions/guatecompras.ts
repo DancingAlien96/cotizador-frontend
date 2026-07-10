@@ -16,6 +16,8 @@ async function requireAuth() {
 
 export async function saveGuatecompras(input: {
   id?: string | null;
+  nombre?: string;
+  autor?: string;
   data: CotizacionGuatecomprasData;
 }): Promise<{ saved: SavedGuatecompras; all: SavedGuatecompras[] }> {
   await requireAuth();

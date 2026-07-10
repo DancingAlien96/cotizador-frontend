@@ -14,6 +14,10 @@ export default async function PrivadasPage({
   const cotizaciones = await listTienda();
   const { id } = await searchParams;
   return (
-    <EditorTienda initialCotizaciones={cotizaciones} initialSelectedId={id} />
+    <EditorTienda
+      initialCotizaciones={cotizaciones}
+      initialSelectedId={id}
+      userEmail={session.email}
+    />
   );
 }

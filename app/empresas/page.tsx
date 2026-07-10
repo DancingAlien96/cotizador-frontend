@@ -22,6 +22,7 @@ export default async function EmpresasPage({
       initialCotizaciones={cotizaciones}
       siguienteNumero={siguienteNumero}
       initialSelectedId={id}
+      userEmail={session.email}
     />
   );
 }

@@ -17,6 +17,7 @@ export default async function CotizacionGuatecomprasPage({
     <EditorGuatecompras
       initialCotizaciones={cotizaciones}
       initialSelectedId={id}
+      userEmail={session.email}
     />
   );
 }

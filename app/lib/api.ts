@@ -23,6 +23,8 @@ export type ApiRecord = {
   id: string;
   tipo: string;
   numero: string | null;
+  nombre?: string | null;
+  autor?: string | null;
   data: unknown;
   createdAt: string;
   updatedAt: string;
@@ -65,6 +67,8 @@ export function apiNextNumero(tipo: string): Promise<{ numero: string }> {
 }
 
 export type Resumen = {
+  nombre?: string | null;
+  autor?: string | null;
   cliente?: string | null;
   total?: number | null;
   fecha?: string | null;
@@ -84,6 +88,8 @@ export type HistorialItem = {
   id: string;
   tipo: string;
   numero: string | null;
+  nombre: string | null;
+  autor: string | null;
   cliente: string | null;
   total: number | null;
   fecha: string | null;

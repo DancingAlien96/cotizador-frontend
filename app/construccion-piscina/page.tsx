@@ -14,6 +14,10 @@ export default async function ConstruccionPiscinaPage({
   const cotizaciones = await listPiscina();
   const { id } = await searchParams;
   return (
-    <EditorPiscina initialCotizaciones={cotizaciones} initialSelectedId={id} />
+    <EditorPiscina
+      initialCotizaciones={cotizaciones}
+      initialSelectedId={id}
+      userEmail={session.email}
+    />
   );
 }

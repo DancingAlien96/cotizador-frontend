@@ -18,6 +18,7 @@ export default async function CartaGarantiaPage({
       initialCotizaciones={cotizaciones}
       backHref="/guatecompras"
       initialSelectedId={id}
+      userEmail={session.email}
     />
   );
 }

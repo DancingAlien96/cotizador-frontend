@@ -14,6 +14,8 @@ import { totalGeneral, type CotizacionPrivadaData } from "./cotizacion-privada";
 export type SavedCotizacionPrivada = {
   id: string;
   numero: string;
+  nombre: string;
+  autor: string;
   data: CotizacionPrivadaData;
   createdAt: number;
   updatedAt: number;
@@ -25,6 +27,8 @@ function map(r: ApiRecord): SavedCotizacionPrivada {
   return {
     id: r.id,
     numero: r.numero ?? "",
+    nombre: r.nombre ?? "",
+    autor: r.autor ?? "",
     data: r.data as CotizacionPrivadaData,
     createdAt: ts(r.createdAt),
     updatedAt: ts(r.updatedAt),
@@ -41,12 +45,16 @@ export async function peekNextNumero(): Promise<string> {
 
 export async function upsertPrivada(input: {
   id?: string | null;
+  nombre?: string;
+  autor?: string;
   data: CotizacionPrivadaData;
 }): Promise<{ saved: SavedCotizacionPrivada; siguienteNumero: string }> {
   const saved = map(
     await apiUpsert(TIPO, {
       id: input.id,
       data: input.data,
+      nombre: input.nombre,
+      autor: input.autor,
       cliente: input.data.clienteNombre,
       total: totalGeneral(input.data.items),
       fecha: input.data.fecha,
