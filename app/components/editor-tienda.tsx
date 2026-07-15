@@ -20,6 +20,7 @@ import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
+import { ClienteAutocomplete } from "./cliente-autocomplete";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -291,7 +292,21 @@ export function EditorTienda({
                   <Field label="Válido hasta" value={data.validoHasta} onChange={(v) => set("validoHasta", v)} />
                 </div>
                 <Field label="Asesor de venta" value={data.asesor} onChange={(v) => set("asesor", v)} />
-                <Field label="Cliente" value={data.cliente} onChange={(v) => set("cliente", v)} />
+                <ClienteAutocomplete
+                  value={data.cliente}
+                  onChange={(v) => set("cliente", v)}
+                  onSelect={(c) =>
+                    setData((prev) => ({
+                      ...prev,
+                      cliente: c.nombre,
+                      nitCliente: c.nit ?? prev.nitCliente,
+                    }))
+                  }
+                  datosActuales={() => ({
+                    nombre: data.cliente,
+                    nit: data.nitCliente,
+                  })}
+                />
                 <Field label="NIT del cliente" value={data.nitCliente} onChange={(v) => set("nitCliente", v)} />
               </div>
             </fieldset>

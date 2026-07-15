@@ -163,6 +163,39 @@ export function apiSetEstado(
   );
 }
 
+export type Cliente = {
+  id: string;
+  nombre: string;
+  nit: string | null;
+  direccion: string | null;
+  telefono: string | null;
+  correo: string | null;
+  contacto: string | null;
+  notas: string | null;
+  updatedAt: string;
+};
+
+export function apiClientes(params: { q?: string } = {}): Promise<Cliente[]> {
+  const sp = new URLSearchParams();
+  if (params.q) sp.set("q", params.q);
+  return request<Cliente[]>(`/api/clientes?${sp.toString()}`);
+}
+
+export function apiUpsertCliente(
+  body: Partial<Cliente> & { nombre: string },
+): Promise<Cliente> {
+  return request<Cliente>("/api/clientes", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function apiDeleteCliente(id: string): Promise<void> {
+  return request<void>(`/api/clientes/${encodeURIComponent(safeId(id))}`, {
+    method: "DELETE",
+  });
+}
+
 export function apiDelete(tipo: string, id: string): Promise<void> {
   return request<void>(
     `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}`,

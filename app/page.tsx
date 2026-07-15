@@ -52,13 +52,20 @@ const categorias: Categoria[] = [
   },
 ];
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  // ?q= llega desde "Cotizaciones" en la ficha de un cliente.
+  const { q = "" } = await searchParams;
+
   let historial: { items: HistorialItem[]; total: number } = { items: [], total: 0 };
   try {
-    historial = await apiHistorial({ limit: 20, offset: 0 });
+    historial = await apiHistorial({ q, limit: 20, offset: 0 });
   } catch {
     // Si el backend no responde, mostramos el historial vacío.
   }
@@ -118,7 +125,7 @@ export default async function Home() {
           ))}
         </div>
 
-        <HistorialGlobal initial={historial} />
+        <HistorialGlobal initial={historial} initialQ={q} />
       </main>
     </div>
   );

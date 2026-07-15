@@ -20,6 +20,7 @@ import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
+import { ClienteAutocomplete } from "./cliente-autocomplete";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -346,7 +347,13 @@ export function EditorPrivada({
               </legend>
               <div className="space-y-3">
                 <Field label="Fecha" value={data.fecha} onChange={(v) => set("fecha", v)} />
-                <Field label="Cliente (destinatario)" value={data.clienteNombre} onChange={(v) => set("clienteNombre", v)} />
+                <ClienteAutocomplete
+                  label="Cliente (destinatario)"
+                  value={data.clienteNombre}
+                  onChange={(v) => set("clienteNombre", v)}
+                  onSelect={(c) => set("clienteNombre", c.nombre)}
+                  datosActuales={() => ({ nombre: data.clienteNombre })}
+                />
                 <Field label="Concepto de la oferta" value={data.concepto} onChange={(v) => set("concepto", v)} />
               </div>
             </fieldset>

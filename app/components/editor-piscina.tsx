@@ -18,6 +18,7 @@ import { descargarWord } from "../lib/word";
 import { wordBodyPiscina } from "../lib/word-bodies";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
+import { ClienteAutocomplete } from "./cliente-autocomplete";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
 
@@ -277,7 +278,23 @@ export function EditorPiscina({
               <Campo label="Título" value={data.titulo} onChange={(v) => set("titulo", v)} />
               <Area label="Subtítulo" value={data.subtitulo} onChange={(v) => set("subtitulo", v)} rows={2} />
               <Area label="Descripción del proyecto" value={data.descripcion} onChange={(v) => set("descripcion", v)} rows={5} />
-              <Campo label="Cliente" value={data.cliente} onChange={(v) => set("cliente", v)} />
+              <ClienteAutocomplete
+                labelClass="mb-1 block text-xs text-zinc-600 dark:text-zinc-400"
+                value={data.cliente}
+                onChange={(v) => set("cliente", v)}
+                onSelect={(c) =>
+                  setData((prev) => ({
+                    ...prev,
+                    cliente: c.nombre,
+                    // En piscinas la "ubicación" es la dirección del proyecto.
+                    ubicacion: c.direccion ?? prev.ubicacion,
+                  }))
+                }
+                datosActuales={() => ({
+                  nombre: data.cliente,
+                  direccion: data.ubicacion,
+                })}
+              />
               <Campo label="Ubicación" value={data.ubicacion} onChange={(v) => set("ubicacion", v)} />
               <Campo label="Fecha de emisión" value={data.fechaEmision} onChange={(v) => set("fechaEmision", v)} />
               <Campo label="Vigencia de la oferta" value={data.vigencia} onChange={(v) => set("vigencia", v)} />

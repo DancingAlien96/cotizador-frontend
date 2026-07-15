@@ -27,6 +27,7 @@ import {
   cartaDesdeGuatecompras,
   CARTA_PREFILL_KEY,
 } from "../lib/carta-desde-cotizacion";
+import { ClienteAutocomplete } from "./cliente-autocomplete";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -346,7 +347,22 @@ export function EditorGuatecompras({
               <div className="space-y-3">
                 <Field label="Fecha" value={data.fecha} onChange={(v) => set("fecha", v)} />
                 <Field label="Número de Operación de Guatecompras" value={data.numeroOperacion} onChange={(v) => set("numeroOperacion", v)} />
-                <Field label="Cotización a (institución)" value={data.cotizacionA} onChange={(v) => set("cotizacionA", v)} />
+                <ClienteAutocomplete
+                  label="Cotización a (institución)"
+                  value={data.cotizacionA}
+                  onChange={(v) => set("cotizacionA", v)}
+                  onSelect={(c) =>
+                    setData((prev) => ({
+                      ...prev,
+                      cotizacionA: c.nombre,
+                      direccion: c.direccion ?? prev.direccion,
+                    }))
+                  }
+                  datosActuales={() => ({
+                    nombre: data.cotizacionA,
+                    direccion: data.direccion,
+                  })}
+                />
                 <FieldArea label="Dirigida a (dependencia)" value={data.dirigidaA} onChange={(v) => set("dirigidaA", v)} />
                 <FieldArea label="Dirección del destinatario" value={data.direccion} onChange={(v) => set("direccion", v)} />
               </div>

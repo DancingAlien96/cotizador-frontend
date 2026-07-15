@@ -23,14 +23,22 @@ export function AppHeader({ backHref }: { backHref?: string }) {
           </span>
         </Link>
       </div>
-      <form action={logout}>
-        <button
-          type="submit"
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+      <div className="flex items-center gap-2">
+        <Link
+          href="/clientes"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          Cerrar sesión
-        </button>
-      </form>
+          Clientes
+        </Link>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
     </header>
   );
 }

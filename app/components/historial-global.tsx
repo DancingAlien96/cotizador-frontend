@@ -23,14 +23,16 @@ const FILTROS = [
 
 export function HistorialGlobal({
   initial,
+  initialQ = "",
 }: {
   initial: { items: HistorialItem[]; total: number };
+  initialQ?: string;
 }) {
   const [items, setItems] = useState<HistorialItem[]>(initial.items);
   const [total, setTotal] = useState(initial.total);
   const [tipo, setTipo] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ);
   const [offset, setOffset] = useState(0);
   const [vista, setVista] = useState<"lista" | "tablero">("lista");
   const [isPending, startTransition] = useTransition();
