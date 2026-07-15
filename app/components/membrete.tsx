@@ -69,7 +69,7 @@ export function MembreteHeader({
           <div className="leading-none text-white">
             <div className="text-xl font-light tracking-[0.32em]">PROMESA</div>
             <div className="mt-1 text-[8px] tracking-[0.2em] text-white/90">
-              TRATAMIENTO DE AGUA
+              EXPERTOS DEL AGUA
             </div>
           </div>
         )}
