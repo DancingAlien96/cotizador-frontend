@@ -17,6 +17,10 @@ export type CotizacionGuatecomprasData = {
   telefono: string;
   correo1: string;
   correo2: string;
+  // Contacto del membrete (encabezado)
+  membreteCorreo: string;
+  membreteTel1: string;
+  membreteTel2: string;
   // Ítems y observaciones
   items: ItemCotizacion[];
   observaciones: string[];
@@ -37,6 +41,9 @@ export const guatecomprasDefaults: CotizacionGuatecomprasData = {
   telefono: "4004-5414",
   correo1: "eregalado@aquaequipos.com",
   correo2: "isabelreg99@gmail.com",
+  membreteCorreo: "eregalado@aquaequipos.com",
+  membreteTel1: "+502 3340 7786",
+  membreteTel2: "4004 5414",
   items: [
     {
       cantidad: "1",

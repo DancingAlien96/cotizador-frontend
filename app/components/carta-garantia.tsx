@@ -5,7 +5,11 @@ import { MembreteHeader, MembreteFooter } from "./membrete";
 export function CartaGarantia({ data }: { data: CartaData }) {
   return (
     <article className="carta">
-      <MembreteHeader />
+      <MembreteHeader
+        correo={data.membreteCorreo}
+        tel1={data.membreteTel1}
+        tel2={data.membreteTel2}
+      />
 
       <div className="carta-body">
       <p className="mb-5">

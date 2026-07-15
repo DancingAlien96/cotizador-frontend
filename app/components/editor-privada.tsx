@@ -444,6 +444,12 @@ export function EditorPrivada({
                 <Field label="Nombre" value={data.empresaNombre} onChange={(v) => set("empresaNombre", v)} />
                 <Field label="Dirección fiscal" value={data.empresaDireccion} onChange={(v) => set("empresaDireccion", v)} />
                 <Field label="NIT" value={data.empresaNit} onChange={(v) => set("empresaNit", v)} />
+                <p className="pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  Membrete (encabezado)
+                </p>
+                <Field label="Correo electrónico" value={data.membreteCorreo} onChange={(v) => set("membreteCorreo", v)} />
+                <Field label="Celular 1" value={data.membreteTel1} onChange={(v) => set("membreteTel1", v)} />
+                <Field label="Celular 2" value={data.membreteTel2} onChange={(v) => set("membreteTel2", v)} />
               </div>
             </details>
           </div>

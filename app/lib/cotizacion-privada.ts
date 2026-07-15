@@ -14,6 +14,10 @@ export type CotizacionPrivadaData = {
   empresaNombre: string;
   empresaDireccion: string;
   empresaNit: string;
+  // Contacto del membrete (encabezado)
+  membreteCorreo: string;
+  membreteTel1: string;
+  membreteTel2: string;
   // Cliente / destinatario
   clienteNombre: string;
   // Concepto de la oferta
@@ -31,6 +35,9 @@ export const cotizacionPrivadaDefaults: CotizacionPrivadaData = {
   empresaNombre: "PROMESA",
   empresaDireccion: "8va Avenida lote 17 Zona 2, Chiquimula, Chiquimula",
   empresaNit: "1654601-6",
+  membreteCorreo: "eregalado@aquaequipos.com",
+  membreteTel1: "+502 3340 7786",
+  membreteTel2: "4004 5414",
   clienteNombre: "ABASTECIMIENTOS ABASA",
   concepto: "repuesto de bomba de alta presión",
   items: [

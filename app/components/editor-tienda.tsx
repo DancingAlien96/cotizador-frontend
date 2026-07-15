@@ -303,6 +303,18 @@ export function EditorTienda({
                 <button onClick={addTermino} className="w-full rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:border-teal-400 hover:text-teal-700 dark:border-zinc-700 dark:text-zinc-400">+ Agregar término</button>
               </div>
             </fieldset>
+
+            {/* Membrete */}
+            <details className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                Membrete (encabezado)
+              </summary>
+              <div className="mt-3 space-y-3">
+                <Field label="Correo electrónico" value={data.membreteCorreo} onChange={(v) => set("membreteCorreo", v)} />
+                <Field label="Celular 1" value={data.membreteTel1} onChange={(v) => set("membreteTel1", v)} />
+                <Field label="Celular 2" value={data.membreteTel2} onChange={(v) => set("membreteTel2", v)} />
+              </div>
+            </details>
           </div>
         </aside>
 

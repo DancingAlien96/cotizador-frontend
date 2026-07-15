@@ -13,6 +13,10 @@ export type CotizacionTiendaData = {
   asesor: string;
   cliente: string;
   nitCliente: string;
+  // Contacto del membrete (encabezado)
+  membreteCorreo: string;
+  membreteTel1: string;
+  membreteTel2: string;
   items: ItemTienda[];
   otros: string;
   terminos: string[];
@@ -24,6 +28,9 @@ export const tiendaDefaults: CotizacionTiendaData = {
   asesor: "Ing. Isabel Regalado",
   cliente: "USAC / FMVZ",
   nitCliente: "255117-9",
+  membreteCorreo: "eregalado@aquaequipos.com",
+  membreteTel1: "+502 3340 7786",
+  membreteTel2: "4004 5414",
   items: [
     {
       descripcion:

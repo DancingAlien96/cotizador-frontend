@@ -23,7 +23,11 @@ export function CotizacionTiendaDoc({
 
   return (
     <article className="cotizacion tienda">
-      <MembreteHeader />
+      <MembreteHeader
+        correo={data.membreteCorreo}
+        tel1={data.membreteTel1}
+        tel2={data.membreteTel2}
+      />
 
       <div className="cotizacion-body">
         {/* Encabezado: asesor y COTIZACIÓN + fechas */}

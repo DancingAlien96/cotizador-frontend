@@ -35,12 +35,19 @@ export function MembreteHeader({
   showWordmark = true,
   logoClass = "h-[58px]",
   logoBadge = false,
+  correo = "eregalado@aquaequipos.com",
+  tel1 = "+502 3340 7786",
+  tel2 = "4004 5414",
 }: {
   logoSrc?: string;
   showWordmark?: boolean;
   logoClass?: string;
   logoBadge?: boolean;
+  correo?: string;
+  tel1?: string;
+  tel2?: string;
 }) {
+  const telefonos = [tel1, tel2].filter((t) => t && t.trim()).join(" / ");
   return (
     <div className="membrete relative h-[76px] w-full overflow-hidden bg-white">
       <svg
@@ -78,13 +85,13 @@ export function MembreteHeader({
       {/* Contacto (sobre la barra oscura) */}
       <div className="absolute right-[168px] top-1/2 flex -translate-y-1/2 flex-col items-end gap-1 text-[10px] leading-tight text-white">
         <div className="flex items-center gap-1.5">
-          eregalado@aquaequipos.com
+          {correo}
           <span className="rounded-full bg-white p-0.5">
             <IconMail />
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          +502 3340 7786 / 4004 5414
+          {telefonos}
           <span className="rounded-full bg-white p-0.5">
             <IconPhone />
           </span>

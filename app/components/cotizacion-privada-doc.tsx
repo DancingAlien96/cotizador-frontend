@@ -22,7 +22,11 @@ export function CotizacionPrivadaDoc({
 
   return (
     <article className="cotizacion">
-      <MembreteHeader />
+      <MembreteHeader
+        correo={data.membreteCorreo}
+        tel1={data.membreteTel1}
+        tel2={data.membreteTel2}
+      />
 
       <div className="cotizacion-body">
         {/* Datos del emisor */}

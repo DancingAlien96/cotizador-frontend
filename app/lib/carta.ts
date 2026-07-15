@@ -13,6 +13,10 @@ export type CartaData = {
   correo: string;
   firmanteEmpresa: string;
   correoFirma: string;
+  // Contacto del membrete (encabezado)
+  membreteCorreo: string;
+  membreteTel1: string;
+  membreteTel2: string;
 };
 
 export const cartaDefaults: CartaData = {
@@ -30,6 +34,9 @@ export const cartaDefaults: CartaData = {
   correo: "Eregalado@aquaequipos.com",
   firmanteEmpresa: "PROMESA / AQUAEQUIPOS",
   correoFirma: "cesarregalado@aquaequipos.com",
+  membreteCorreo: "eregalado@aquaequipos.com",
+  membreteTel1: "+502 3340 7786",
+  membreteTel2: "4004 5414",
 };
 
 // Etiquetas y agrupación de los campos del formulario.
@@ -74,6 +81,14 @@ export const cartaFields: {
     fields: [
       { name: "firmanteEmpresa", label: "Empresa (firma)" },
       { name: "correoFirma", label: "Correo (firma)" },
+    ],
+  },
+  {
+    group: "Membrete (encabezado)",
+    fields: [
+      { name: "membreteCorreo", label: "Correo electrónico" },
+      { name: "membreteTel1", label: "Celular 1" },
+      { name: "membreteTel2", label: "Celular 2" },
     ],
   },
 ];

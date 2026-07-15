@@ -376,6 +376,12 @@ export function EditorGuatecompras({
                 <Field label="Teléfono" value={data.telefono} onChange={(v) => set("telefono", v)} />
                 <Field label="Correo electrónico" value={data.correo1} onChange={(v) => set("correo1", v)} />
                 <Field label="Correo electrónico 2" value={data.correo2} onChange={(v) => set("correo2", v)} />
+                <p className="pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  Membrete (encabezado)
+                </p>
+                <Field label="Correo electrónico" value={data.membreteCorreo} onChange={(v) => set("membreteCorreo", v)} />
+                <Field label="Celular 1" value={data.membreteTel1} onChange={(v) => set("membreteTel1", v)} />
+                <Field label="Celular 2" value={data.membreteTel2} onChange={(v) => set("membreteTel2", v)} />
               </div>
             </details>
           </div>
