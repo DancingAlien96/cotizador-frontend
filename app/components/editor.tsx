@@ -8,6 +8,8 @@ import { CartaGarantia } from "./carta-garantia";
 import { logout } from "../actions/auth";
 import { saveCotizacion, removeCotizacion } from "../actions/cotizaciones";
 import { descargarPdf, toFilename } from "../lib/pdf";
+import { descargarWord } from "../lib/word";
+import { wordBodyCarta } from "../lib/word-bodies";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
@@ -68,6 +70,23 @@ export function Editor({
 
   function update(name: keyof CartaData, value: string) {
     setData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  const [wordLoading, setWordLoading] = useState(false);
+  async function handleDescargarWord() {
+    setWordLoading(true);
+    try {
+      await descargarWord({
+        filename: toFilename(nombre.trim() || defaultNombre(data)).replace(/\.pdf$/, ".doc"),
+        root: cartaRef.current,
+        bodyHtml: wordBodyCarta(data),
+      });
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo generar el Word. Intenta de nuevo.");
+    } finally {
+      setWordLoading(false);
+    }
   }
 
   async function handleDescargarPdf() {
@@ -156,6 +175,13 @@ export function Editor({
             className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
           >
             {pdfLoading ? "Generando…" : "Descargar PDF"}
+          </button>
+          <button
+            onClick={handleDescargarWord}
+            disabled={wordLoading}
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {wordLoading ? "Generando…" : "Word"}
           </button>
           <button
             onClick={() => window.print()}

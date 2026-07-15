@@ -14,6 +14,8 @@ import type { SavedPiscina } from "../lib/store-piscina";
 import { PropuestaPiscinaDoc } from "./propuesta-piscina-doc";
 import { savePiscina, removePiscina } from "../actions/piscina";
 import { descargarPdfMultipagina, toFilename } from "../lib/pdf";
+import { descargarWord } from "../lib/word";
+import { wordBodyPiscina } from "../lib/word-bodies";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
@@ -164,6 +166,23 @@ export function EditorPiscina({
     reader.readAsDataURL(file);
   }
 
+  const [wordLoading, setWordLoading] = useState(false);
+  async function handleWord() {
+    setWordLoading(true);
+    try {
+      await descargarWord({
+        filename: toFilename(`Propuesta Piscina ${data.cliente || ""}`).replace(/\.pdf$/, ".doc"),
+        root: docRef.current,
+        bodyHtml: wordBodyPiscina(data),
+      });
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo generar el Word. Intenta de nuevo.");
+    } finally {
+      setWordLoading(false);
+    }
+  }
+
   async function handlePdf() {
     if (!docRef.current) return;
     setPdfLoading(true);
@@ -195,6 +214,9 @@ export function EditorPiscina({
         <div className="flex items-center gap-2">
           <button onClick={handlePdf} disabled={pdfLoading} className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60">
             {pdfLoading ? "Generando…" : "Descargar PDF"}
+          </button>
+          <button onClick={handleWord} disabled={wordLoading} className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
+            {wordLoading ? "Generando…" : "Word"}
           </button>
           <button onClick={() => window.print()} className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
             Imprimir
