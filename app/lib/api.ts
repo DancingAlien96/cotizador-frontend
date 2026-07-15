@@ -19,6 +19,22 @@ function safeId(id: string): string {
   return id;
 }
 
+// Estados de seguimiento del CRM. Como con `tipo`, la API los devuelve en
+// mayúsculas (enum de Prisma) y acepta el parámetro sin importar la caja.
+export const ESTADOS = [
+  "PENDIENTE",
+  "EN_CURSO",
+  "CONFIRMADA",
+  "RECHAZADA",
+] as const;
+export type Estado = (typeof ESTADOS)[number];
+
+function safeEstado(estado: string): Estado {
+  const e = estado.toUpperCase() as Estado;
+  if (!ESTADOS.includes(e)) throw new Error(`Estado inválido: ${estado}`);
+  return e;
+}
+
 export type ApiRecord = {
   id: string;
   tipo: string;
@@ -93,21 +109,58 @@ export type HistorialItem = {
   cliente: string | null;
   total: number | null;
   fecha: string | null;
+  estado: Estado;
+  motivoRechazo: string | null;
+  estadoAt: string;
   updatedAt: string;
 };
 
 export function apiHistorial(params: {
   tipo?: string;
+  estado?: string;
   q?: string;
   limit?: number;
   offset?: number;
 }): Promise<{ items: HistorialItem[]; total: number; limit: number; offset: number }> {
   const sp = new URLSearchParams();
   if (params.tipo) sp.set("tipo", params.tipo);
+  if (params.estado) sp.set("estado", safeEstado(params.estado));
   if (params.q) sp.set("q", params.q);
   if (params.limit != null) sp.set("limit", String(params.limit));
   if (params.offset != null) sp.set("offset", String(params.offset));
   return request(`/api/historial?${sp.toString()}`);
+}
+
+export type ColumnaTablero = {
+  estado: Estado;
+  items: HistorialItem[];
+  total: number;
+  monto: number;
+};
+
+export function apiTablero(params: {
+  tipo?: string;
+  q?: string;
+}): Promise<{ columnas: ColumnaTablero[]; porColumna: number }> {
+  const sp = new URLSearchParams();
+  if (params.tipo) sp.set("tipo", params.tipo);
+  if (params.q) sp.set("q", params.q);
+  return request(`/api/historial/tablero?${sp.toString()}`);
+}
+
+export function apiSetEstado(
+  tipo: string,
+  id: string,
+  estado: Estado,
+  motivoRechazo?: string | null,
+): Promise<{ id: string; estado: Estado; motivoRechazo: string | null; estadoAt: string }> {
+  return request(
+    `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}/estado`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ estado: safeEstado(estado), motivoRechazo }),
+    },
+  );
 }
 
 export function apiDelete(tipo: string, id: string): Promise<void> {
