@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "./lib/session";
 import { apiHistorial, type HistorialItem } from "./lib/api";
 import { AppHeader } from "./components/app-header";
+import { Alertas } from "./components/alertas";
 import { HistorialGlobal } from "./components/historial-global";
 
 type Categoria = {
@@ -125,6 +126,7 @@ export default async function Home({
           ))}
         </div>
 
+        <Alertas />
         <HistorialGlobal initial={historial} initialQ={q} />
       </main>
     </div>

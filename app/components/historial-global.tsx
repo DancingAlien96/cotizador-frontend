@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { fetchHistorial, setEstado } from "../actions/historial";
+import { fetchHistorial, setEstado, setSeguimiento } from "../actions/historial";
 import { formatQ } from "../lib/cotizacion-privada";
 import type { Estado, HistorialItem } from "../lib/api";
 import { ESTADO_INFO, ESTADO_ORDEN } from "../lib/estados";
 import { tipoInfo, rutaAbrir } from "../lib/tipos";
 import { EstadoSelect } from "./estado-select";
+import { SeguimientoFecha } from "./seguimiento-fecha";
 import { Tablero } from "./tablero";
 
 const LIMIT = 20;
@@ -77,6 +78,20 @@ export function HistorialGlobal({
     startEstadoTransition(async () => {
       try {
         await setEstado({ tipo: it.tipo, id: it.id, estado, motivoRechazo: motivo });
+      } catch {
+        setItems(antes);
+      }
+    });
+  }
+
+  function cambiarSeguimiento(it: HistorialItem, fecha: string | null) {
+    const antes = items;
+    setItems((prev) =>
+      prev.map((x) => (x.id === it.id ? { ...x, seguimientoAt: fecha } : x)),
+    );
+    startEstadoTransition(async () => {
+      try {
+        await setSeguimiento({ tipo: it.tipo, id: it.id, fecha });
       } catch {
         setItems(antes);
       }
@@ -164,6 +179,7 @@ export function HistorialGlobal({
               <th className="px-4 py-2.5 font-medium">Tipo</th>
               <th className="px-4 py-2.5 font-medium">Nombre / Cliente</th>
               <th className="px-4 py-2.5 font-medium">Estado</th>
+              <th className="px-4 py-2.5 font-medium">Recordar</th>
               <th className="px-4 py-2.5 font-medium">Autor</th>
               <th className="px-4 py-2.5 font-medium">No.</th>
               <th className="px-4 py-2.5 text-right font-medium">Total</th>
@@ -201,6 +217,12 @@ export function HistorialGlobal({
                       onChange={(e, motivo) => cambiarEstado(it, e, motivo)}
                     />
                   </td>
+                  <td className="px-4 py-2.5">
+                    <SeguimientoFecha
+                      valor={it.seguimientoAt}
+                      onChange={(fecha) => cambiarSeguimiento(it, fecha)}
+                    />
+                  </td>
                   <td className="max-w-[10rem] truncate px-4 py-2.5 text-zinc-500">
                     {it.autor || "—"}
                   </td>
@@ -222,7 +244,7 @@ export function HistorialGlobal({
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-zinc-400">
+                <td colSpan={9} className="px-4 py-10 text-center text-zinc-400">
                   No hay cotizaciones que coincidan.
                 </td>
               </tr>

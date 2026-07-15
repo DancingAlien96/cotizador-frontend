@@ -215,6 +215,22 @@ function TarjetaCotizacion({
         {item.numero && (
           <span className="text-[10px] text-zinc-400">No. {item.numero}</span>
         )}
+        {item.seguimientoAt && (
+          <span
+            title={`Recordatorio: ${new Date(item.seguimientoAt).toLocaleDateString("es-GT")}`}
+            className={`text-[10px] ${
+              new Date(item.seguimientoAt).getTime() <= Date.now()
+                ? "font-semibold text-rose-600 dark:text-rose-400"
+                : "text-zinc-400"
+            }`}
+          >
+            🔔{" "}
+            {new Date(item.seguimientoAt).toLocaleDateString("es-GT", {
+              day: "2-digit",
+              month: "short",
+            })}
+          </span>
+        )}
       </div>
 
       {item.motivoRechazo && (

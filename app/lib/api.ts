@@ -112,8 +112,30 @@ export type HistorialItem = {
   estado: Estado;
   motivoRechazo: string | null;
   estadoAt: string;
+  seguimientoAt: string | null;
   updatedAt: string;
 };
+
+export type Alertas = {
+  vencidas: HistorialItem[];
+  estancadas: HistorialItem[];
+  dias: number;
+};
+
+export function apiAlertas(): Promise<Alertas> {
+  return request<Alertas>("/api/historial/alertas");
+}
+
+export function apiSetSeguimiento(
+  tipo: string,
+  id: string,
+  fecha: string | null,
+): Promise<{ id: string; seguimientoAt: string | null }> {
+  return request(
+    `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}/seguimiento`,
+    { method: "PATCH", body: JSON.stringify({ fecha }) },
+  );
+}
 
 export function apiHistorial(params: {
   tipo?: string;
