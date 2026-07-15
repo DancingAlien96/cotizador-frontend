@@ -14,6 +14,7 @@ import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
+import { CARTA_PREFILL_KEY } from "../lib/carta-desde-cotizacion";
 
 function defaultNombre(data: CartaData): string {
   const inst = data.institucion.trim();
@@ -36,11 +37,13 @@ export function Editor({
   initialCotizaciones,
   backHref = "/",
   initialSelectedId,
+  prefillDesdeCotizacion = false,
   userEmail = "",
 }: {
   initialCotizaciones: SavedCotizacion[];
   backHref?: string;
   initialSelectedId?: string;
+  prefillDesdeCotizacion?: boolean;
   userEmail?: string;
 }) {
   const [data, setData] = useState<CartaData>(cartaDefaults);
@@ -51,6 +54,7 @@ export function Editor({
   const [saveOpen, setSaveOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
   const cartaRef = useRef<HTMLDivElement>(null);
 
   const { draft, canRestore, clear: clearDraft } = useDraft("carta", {
@@ -122,6 +126,23 @@ export function Editor({
     if (!initialSelectedId) return;
     const item = initialCotizaciones.find((c) => c.id === initialSelectedId);
     if (item) handleCargar(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Datos traídos desde una cotización de Guatecompras ("Generar Carta de Garantía").
+  useEffect(() => {
+    if (!prefillDesdeCotizacion) return;
+    let prefill: Partial<CartaData> | null = null;
+    try {
+      const raw = sessionStorage.getItem(CARTA_PREFILL_KEY);
+      sessionStorage.removeItem(CARTA_PREFILL_KEY);
+      if (raw) prefill = JSON.parse(raw) as Partial<CartaData>;
+    } catch {
+      prefill = null;
+    }
+    if (!prefill) return;
+    setData((prev) => ({ ...prev, ...prefill }));
+    setPrefilled(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -202,6 +223,21 @@ export function Editor({
 
       {canRestore && (
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
+      )}
+
+      {prefilled && (
+        <div className="no-print flex items-center justify-between gap-3 border-b border-teal-200 bg-teal-50 px-4 py-2 text-sm text-teal-800 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-200">
+          <span>
+            Datos tomados de la cotización de Guatecompras. Revisa la ciudad, los
+            meses de garantía y la firma antes de guardar.
+          </span>
+          <button
+            onClick={() => setPrefilled(false)}
+            className="shrink-0 text-teal-700 hover:underline dark:text-teal-300"
+          >
+            Entendido
+          </button>
+        </div>
       )}
 
       {saveOpen && (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   guatecomprasDefaults,
@@ -22,6 +23,10 @@ import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
+import {
+  cartaDesdeGuatecompras,
+  CARTA_PREFILL_KEY,
+} from "../lib/carta-desde-cotizacion";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -154,6 +159,20 @@ export function EditorGuatecompras({
     });
   }
 
+  const router = useRouter();
+  // Reutiliza los datos de esta cotización para generar la Carta de Garantía.
+  function handleGenerarCarta() {
+    try {
+      sessionStorage.setItem(
+        CARTA_PREFILL_KEY,
+        JSON.stringify(cartaDesdeGuatecompras(data)),
+      );
+    } catch {
+      // Si no hay sessionStorage, la carta simplemente abre con sus defaults.
+    }
+    router.push("/guatecompras/carta-garantia?desde=cotizacion");
+  }
+
   const [wordLoading, setWordLoading] = useState(false);
   async function handleDescargarWord() {
     setWordLoading(true);
@@ -271,6 +290,14 @@ export function EditorGuatecompras({
                   Nueva
                 </button>
               </div>
+
+              <button
+                onClick={handleGenerarCarta}
+                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-teal-600 px-3 py-1.5 text-sm font-medium text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950"
+              >
+                Generar Carta de Garantía
+                <span aria-hidden>→</span>
+              </button>
 
               {saved.length > 0 && (
                 <ul className="mt-3 max-h-48 space-y-1 overflow-y-auto">
