@@ -185,6 +185,45 @@ export function apiSetEstado(
   );
 }
 
+export type GrupoReporte = {
+  clave: string;
+  total: number;
+  ganadas: number;
+  perdidas: number;
+  monto: number;
+  montoGanado: number;
+};
+
+export type Reporte = {
+  embudo: { estado: Estado; cantidad: number; monto: number }[];
+  resumen: {
+    total: number;
+    montoTotal: number;
+    ganadas: number;
+    montoGanado: number;
+    perdidas: number;
+    montoPerdido: number;
+    abiertas: number;
+    // null cuando todavía no se ha cerrado ninguna.
+    tasaCierre: number | null;
+  };
+  motivos: { motivo: string; cantidad: number; monto: number }[];
+  porAsesor: GrupoReporte[];
+  porTipo: GrupoReporte[];
+};
+
+export function apiReporte(params: {
+  desde?: string;
+  hasta?: string;
+  tipo?: string;
+}): Promise<Reporte> {
+  const sp = new URLSearchParams();
+  if (params.desde) sp.set("desde", params.desde);
+  if (params.hasta) sp.set("hasta", params.hasta);
+  if (params.tipo) sp.set("tipo", params.tipo);
+  return request<Reporte>(`/api/reportes?${sp.toString()}`);
+}
+
 export type Cliente = {
   id: string;
   nombre: string;

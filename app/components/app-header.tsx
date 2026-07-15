@@ -30,6 +30,12 @@ export function AppHeader({ backHref }: { backHref?: string }) {
         >
           Clientes
         </Link>
+        <Link
+          href="/reportes"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Reportes
+        </Link>
         <form action={logout}>
           <button
             type="submit"
