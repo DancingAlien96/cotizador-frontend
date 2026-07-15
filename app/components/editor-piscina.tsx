@@ -171,7 +171,7 @@ export function EditorPiscina({
     setWordLoading(true);
     try {
       await descargarWord({
-        filename: toFilename(`Propuesta Piscina ${data.cliente || ""}`).replace(/\.pdf$/, ".doc"),
+        filename: toFilename(`Propuesta Piscina ${data.cliente || ""}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
         bodyHtml: wordBodyPiscina(data),
       });

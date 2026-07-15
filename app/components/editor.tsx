@@ -77,7 +77,7 @@ export function Editor({
     setWordLoading(true);
     try {
       await descargarWord({
-        filename: toFilename(nombre.trim() || defaultNombre(data)).replace(/\.pdf$/, ".doc"),
+        filename: toFilename(nombre.trim() || defaultNombre(data)).replace(/\.pdf$/, ".docx"),
         root: cartaRef.current,
         bodyHtml: wordBodyCarta(data),
       });

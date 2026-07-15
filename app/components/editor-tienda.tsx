@@ -155,7 +155,7 @@ export function EditorTienda({
     setWordLoading(true);
     try {
       await descargarWord({
-        filename: toFilename(`Cotizacion ${data.cliente || "tienda"}`).replace(/\.pdf$/, ".doc"),
+        filename: toFilename(`Cotizacion ${data.cliente || "tienda"}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
         bodyHtml: wordBodyTienda(data),
       });

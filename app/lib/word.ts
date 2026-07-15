@@ -1,4 +1,4 @@
-// Exportación a Word (.doc) con cuerpo editable.
+// Exportación a Word (.docx) con cuerpo editable.
 // El membrete (gráfico) se inserta como imagen para conservar el diseño; el
 // resto va como HTML compatible con Word (texto y tablas editables).
 
@@ -82,9 +82,13 @@ ${footer}
 </body>
 </html>`;
 
-  const blob = new Blob(["﻿", html], {
-    type: "application/msword;charset=utf-8",
-  });
+  // Genera un .docx real (Word lo abre sin avisos de formato).
+  const { asBlob } = await import("html-docx-js-typescript");
+  const blob = (await asBlob(html, {
+    orientation: "portrait",
+    margins: { top: 0, right: 0, bottom: 0, left: 0 },
+  })) as Blob;
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
