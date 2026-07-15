@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { fetchReporte } from "../actions/reportes";
 import { formatQ } from "../lib/cotizacion-privada";
@@ -50,10 +49,7 @@ export function Reportes({ initial }: { initial: Reporte }) {
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6">
-        <Link href="/" className="text-sm text-teal-700 hover:underline">
-          ← Volver
-        </Link>
-        <h1 className="mt-1 text-2xl font-bold text-zinc-800 dark:text-zinc-100">
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">
           Reportes de cierre
         </h1>
         <p className="text-sm text-zinc-500">

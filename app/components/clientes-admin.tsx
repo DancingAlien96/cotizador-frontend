@@ -53,10 +53,7 @@ export function ClientesAdmin({ initial }: { initial: Cliente[] }) {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <Link href="/" className="text-sm text-teal-700 hover:underline">
-            ← Volver
-          </Link>
-          <h1 className="mt-1 text-2xl font-bold text-zinc-800 dark:text-zinc-100">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">
             Clientes
           </h1>
           <p className="text-sm text-zinc-500">
@@ -105,7 +102,7 @@ export function ClientesAdmin({ initial }: { initial: Cliente[] }) {
                   <div className="flex justify-end gap-3">
                     {/* Reusa la búsqueda del historial para ver su seguimiento. */}
                     <Link
-                      href={`/?q=${encodeURIComponent(c.nombre)}`}
+                      href={`/seguimiento?q=${encodeURIComponent(c.nombre)}`}
                       className="text-xs font-medium text-teal-700 hover:underline"
                     >
                       Cotizaciones

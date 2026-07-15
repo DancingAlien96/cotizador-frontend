@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { cartaDefaults, cartaFields, type CartaData } from "../lib/carta";
 import type { SavedCotizacion } from "../lib/store";
 import { CartaGarantia } from "./carta-garantia";
-import { logout } from "../actions/auth";
 import { saveCotizacion, removeCotizacion } from "../actions/cotizaciones";
 import { descargarPdf, toFilename } from "../lib/pdf";
 import { descargarWord } from "../lib/word";
@@ -210,14 +209,6 @@ export function Editor({
           >
             Imprimir
           </button>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              Cerrar sesión
-            </button>
-          </form>
         </div>
       </header>
 

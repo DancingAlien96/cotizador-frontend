@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "./lib/session";
-import { apiHistorial, type HistorialItem } from "./lib/api";
-import { AppHeader } from "./components/app-header";
-import { Alertas } from "./components/alertas";
-import { HistorialGlobal } from "./components/historial-global";
 
 type Categoria = {
   href: string;
@@ -53,28 +49,12 @@ const categorias: Categoria[] = [
   },
 ];
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
+export default async function Home() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  // ?q= llega desde "Cotizaciones" en la ficha de un cliente.
-  const { q = "" } = await searchParams;
-
-  let historial: { items: HistorialItem[]; total: number } = { items: [], total: 0 };
-  try {
-    historial = await apiHistorial({ q, limit: 20, offset: 0 });
-  } catch {
-    // Si el backend no responde, mostramos el historial vacío.
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-zinc-100 dark:bg-zinc-950">
-      <AppHeader />
-
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-semibold text-zinc-800 dark:text-zinc-100">
@@ -126,8 +106,6 @@ export default async function Home({
           ))}
         </div>
 
-        <Alertas />
-        <HistorialGlobal initial={historial} initialQ={q} />
       </main>
     </div>
   );
