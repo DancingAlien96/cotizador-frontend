@@ -24,6 +24,9 @@ export function CotizacionesSwitcher({
   initialSelectedId?: string;
 }) {
   const [formato, setFormato] = useState<Formato>(initialFormato);
+  // Tienda y Empresas comparten el correlativo: se mantiene aquí para que siga
+  // actualizado al cambiar de formato sin recargar.
+  const [sigNumero, setSigNumero] = useState(siguienteNumero);
 
   const selector = (
     <div className="flex rounded-lg border border-zinc-300 p-0.5 text-sm dark:border-zinc-700">
@@ -50,6 +53,8 @@ export function CotizacionesSwitcher({
   return formato === "tienda" ? (
     <EditorTienda
       initialCotizaciones={tienda}
+      siguienteNumero={sigNumero}
+      onSiguienteNumero={setSigNumero}
       initialSelectedId={selectedId("tienda")}
       userEmail={userEmail}
       headerExtra={selector}
@@ -57,7 +62,8 @@ export function CotizacionesSwitcher({
   ) : (
     <EditorPrivada
       initialCotizaciones={empresas}
-      siguienteNumero={siguienteNumero}
+      siguienteNumero={sigNumero}
+      onSiguienteNumero={setSigNumero}
       initialSelectedId={selectedId("empresas")}
       userEmail={userEmail}
       headerExtra={selector}

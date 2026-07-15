@@ -27,12 +27,14 @@ const inputClass =
 export function EditorPrivada({
   initialCotizaciones,
   siguienteNumero,
+  onSiguienteNumero,
   initialSelectedId,
   userEmail = "",
   headerExtra,
 }: {
   initialCotizaciones: SavedCotizacionPrivada[];
   siguienteNumero: string;
+  onSiguienteNumero?: (n: string) => void;
   initialSelectedId?: string;
   userEmail?: string;
   headerExtra?: React.ReactNode;
@@ -154,6 +156,7 @@ export function EditorPrivada({
       setCurrentId(res.saved.id);
       setNumero(res.saved.numero);
       setProximoNumero(res.siguienteNumero);
+      onSiguienteNumero?.(res.siguienteNumero);
       clearDraft();
       setSaveOpen(false);
     });
@@ -164,6 +167,7 @@ export function EditorPrivada({
       const res = await removePrivada(id);
       setSaved(res.all);
       setProximoNumero(res.siguienteNumero);
+      onSiguienteNumero?.(res.siguienteNumero);
       if (id === currentId) {
         setData(cotizacionPrivadaDefaults);
         setCurrentId(null);

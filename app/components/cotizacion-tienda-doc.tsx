@@ -9,8 +9,10 @@ import {
 
 export function CotizacionTiendaDoc({
   data,
+  numero,
 }: {
   data: CotizacionTiendaData;
+  numero: string;
 }) {
   const items = data.items.filter(
     (it) => it.descripcion.trim() || it.precio.trim() || it.cantidad.trim(),
@@ -43,6 +45,10 @@ export function CotizacionTiendaDoc({
             </h2>
             <table className="tabla-fechas ml-auto">
               <tbody>
+                <tr>
+                  <td className="font-bold">COTIZACIÓN No.</td>
+                  <td className="font-bold">{numero}</td>
+                </tr>
                 <tr>
                   <td className="font-bold">FECHA</td>
                   <td>{data.fecha}</td>

@@ -26,11 +26,15 @@ const inputClass =
 
 export function EditorTienda({
   initialCotizaciones,
+  siguienteNumero,
+  onSiguienteNumero,
   initialSelectedId,
   userEmail = "",
   headerExtra,
 }: {
   initialCotizaciones: SavedTienda[];
+  siguienteNumero: string;
+  onSiguienteNumero?: (n: string) => void;
   initialSelectedId?: string;
   userEmail?: string;
   headerExtra?: React.ReactNode;
@@ -38,6 +42,8 @@ export function EditorTienda({
   const [data, setData] = useState<CotizacionTiendaData>(tiendaDefaults);
   const [saved, setSaved] = useState<SavedTienda[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [numero, setNumero] = useState(siguienteNumero);
+  const [proximoNumero, setProximoNumero] = useState(siguienteNumero);
   const [nombre, setNombre] = useState("");
   const [autor, setAutor] = useState(userEmail);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -48,6 +54,7 @@ export function EditorTienda({
   const { draft, canRestore, clear: clearDraft } = useDraft("tienda", {
     data,
     currentId,
+    numero,
     nombre,
     autor,
   });
@@ -55,6 +62,7 @@ export function EditorTienda({
     if (!draft) return;
     setData(draft.snapshot.data);
     setCurrentId(draft.snapshot.currentId);
+    setNumero(draft.snapshot.numero ?? proximoNumero);
     setNombre(draft.snapshot.nombre ?? "");
     setAutor(draft.snapshot.autor ?? userEmail);
     clearDraft();
@@ -110,6 +118,7 @@ export function EditorTienda({
   function handleNueva() {
     setData(tiendaDefaults);
     setCurrentId(null);
+    setNumero(proximoNumero);
     setNombre("");
     setAutor(userEmail);
     clearDraft();
@@ -117,6 +126,7 @@ export function EditorTienda({
   function handleCargar(item: SavedTienda) {
     setData(item.data);
     setCurrentId(item.id);
+    setNumero(item.numero);
     setNombre(item.nombre);
     setAutor(item.autor || userEmail);
   }
@@ -139,6 +149,9 @@ export function EditorTienda({
       });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      setNumero(res.saved.numero);
+      setProximoNumero(res.siguienteNumero);
+      onSiguienteNumero?.(res.siguienteNumero);
       clearDraft();
       setSaveOpen(false);
     });
@@ -146,9 +159,18 @@ export function EditorTienda({
   function handleEliminar(id: string) {
     if (!confirm("¿Eliminar esta cotización?")) return;
     startTransition(async () => {
-      const all = await removeTienda(id);
-      setSaved(all);
-      if (id === currentId) handleNueva();
+      const res = await removeTienda(id);
+      setSaved(res.all);
+      setProximoNumero(res.siguienteNumero);
+      onSiguienteNumero?.(res.siguienteNumero);
+      if (id === currentId) {
+        setData(tiendaDefaults);
+        setCurrentId(null);
+        setNumero(res.siguienteNumero);
+        setNombre("");
+        setAutor(userEmail);
+        clearDraft();
+      }
     });
   }
 
@@ -157,9 +179,9 @@ export function EditorTienda({
     setWordLoading(true);
     try {
       await descargarWord({
-        filename: toFilename(`Cotizacion ${data.cliente || "tienda"}`).replace(/\.pdf$/, ".docx"),
+        filename: toFilename(`Cotizacion ${numero}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
-        bodyHtml: wordBodyTienda(data),
+        bodyHtml: wordBodyTienda(data, numero),
       });
     } catch (err) {
       console.error(err);
@@ -175,7 +197,7 @@ export function EditorTienda({
     try {
       await descargarPdf(
         docRef.current,
-        toFilename(`Cotizacion ${data.cliente || "tienda"}`),
+        toFilename(`Cotizacion ${numero}`),
       );
     } catch (err) {
       console.error(err);
@@ -232,7 +254,7 @@ export function EditorTienda({
             {/* Guardadas */}
             <section className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">Cotización</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">Cotización No. {numero}</span>
                 <span className="text-[11px] text-zinc-400">{currentId ? "Editando" : "Nueva"}</span>
               </div>
               <div className="flex gap-2">
@@ -346,7 +368,7 @@ export function EditorTienda({
         <main className="flex-1 overflow-y-auto p-4 lg:h-[calc(100vh-57px)] lg:p-8">
           <PreviewScaler>
             <div id="print-area" ref={docRef}>
-              <CotizacionTiendaDoc data={data} />
+              <CotizacionTiendaDoc data={data} numero={numero} />
             </div>
           </PreviewScaler>
         </main>

@@ -95,7 +95,10 @@ export function wordBodyEmpresas(
 }
 
 // ---------- Tienda ----------
-export function wordBodyTienda(data: CotizacionTiendaData): string {
+export function wordBodyTienda(
+  data: CotizacionTiendaData,
+  numero: string,
+): string {
   const items = data.items.filter((i) => i.descripcion.trim() || i.precio.trim());
   const subtotal = subtotalTienda(items);
   const total = totalTienda(items, data.otros);
@@ -105,6 +108,7 @@ export function wordBodyTienda(data: CotizacionTiendaData): string {
   <td style="vertical-align:top;text-align:right">
     <p style="font-size:18pt;color:#27aae1"><b>COTIZACIÓN</b></p>
     <table style="margin-left:auto">
+      <tr><td ${TD}><b>COTIZACIÓN No.</b></td><td ${TD}><b>${esc(numero)}</b></td></tr>
       <tr><td ${TD}><b>FECHA</b></td><td ${TD}>${esc(data.fecha)}</td></tr>
       <tr><td ${TD}><b>VALIDO HASTA</b></td><td ${TD}>${esc(data.validoHasta)}</td></tr>
     </table>

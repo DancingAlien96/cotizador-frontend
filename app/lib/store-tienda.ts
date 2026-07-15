@@ -1,8 +1,16 @@
-import { apiList, apiUpsert, apiDelete, ts, type ApiRecord } from "./api";
+import {
+  apiList,
+  apiUpsert,
+  apiDelete,
+  apiNextNumero,
+  ts,
+  type ApiRecord,
+} from "./api";
 import { totalTienda, type CotizacionTiendaData } from "./cotizacion-tienda";
 
 export type SavedTienda = {
   id: string;
+  numero: string;
   nombre: string;
   autor: string;
   data: CotizacionTiendaData;
@@ -15,6 +23,7 @@ const TIPO = "tienda";
 function map(r: ApiRecord): SavedTienda {
   return {
     id: r.id,
+    numero: r.numero ?? "",
     nombre: r.nombre ?? "",
     autor: r.autor ?? "",
     data: r.data as CotizacionTiendaData,
@@ -27,13 +36,17 @@ export async function listTienda(): Promise<SavedTienda[]> {
   return (await apiList(TIPO)).map(map);
 }
 
+export async function peekNextNumeroTienda(): Promise<string> {
+  return (await apiNextNumero(TIPO)).numero;
+}
+
 export async function upsertTienda(input: {
   id?: string | null;
   nombre?: string;
   autor?: string;
   data: CotizacionTiendaData;
-}): Promise<SavedTienda> {
-  return map(
+}): Promise<{ saved: SavedTienda; siguienteNumero: string }> {
+  const saved = map(
     await apiUpsert(TIPO, {
       id: input.id,
       data: input.data,
@@ -44,6 +57,8 @@ export async function upsertTienda(input: {
       fecha: input.data.fecha,
     }),
   );
+  const siguienteNumero = await peekNextNumeroTienda();
+  return { saved, siguienteNumero };
 }
 
 export async function deleteTienda(id: string): Promise<void> {
