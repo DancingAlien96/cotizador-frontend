@@ -28,10 +28,12 @@ export function EditorTienda({
   initialCotizaciones,
   initialSelectedId,
   userEmail = "",
+  headerExtra,
 }: {
   initialCotizaciones: SavedTienda[];
   initialSelectedId?: string;
   userEmail?: string;
+  headerExtra?: React.ReactNode;
 }) {
   const [data, setData] = useState<CotizacionTiendaData>(tiendaDefaults);
   const [saved, setSaved] = useState<SavedTienda[]>(initialCotizaciones);
@@ -193,8 +195,9 @@ export function EditorTienda({
             ← Inicio
           </Link>
           <h1 className="font-semibold text-zinc-800 dark:text-zinc-100">
-            Cotización tienda
+            Cotización
           </h1>
+          {headerExtra}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={handleDescargarPdf} disabled={pdfLoading} className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60">

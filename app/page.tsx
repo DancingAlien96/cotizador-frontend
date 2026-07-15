@@ -15,12 +15,15 @@ type Categoria = {
 
 const categorias: Categoria[] = [
   {
-    href: "/privadas",
-    titulo: "Cotizaciones tienda",
-    descripcion: "Cotizaciones de venta en tienda.",
-    imagen: "/cotizacion_tiendas.jpg",
+    href: "/cotizaciones",
+    titulo: "Cotizaciones",
+    descripcion: "Cotizaciones para tienda y empresas (elige el formato).",
+    imagen: "/cotizacion_empresas.jpg",
     icon: (
-      <path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z" />
+      <>
+        <rect x="3" y="7" width="18" height="14" rx="1.5" />
+        <path d="M8 7V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18" />
+      </>
     ),
   },
   {
@@ -31,18 +34,6 @@ const categorias: Categoria[] = [
     icon: (
       <>
         <path d="M3 21h18M4 21V10M20 21V10M4 10l8-6 8 6M9 21v-6h6v6" />
-      </>
-    ),
-  },
-  {
-    href: "/empresas",
-    titulo: "Cotizaciones de empresas",
-    descripcion: "Cotizaciones para empresas y corporativos.",
-    imagen: "/cotizacion_empresas.jpg",
-    icon: (
-      <>
-        <rect x="3" y="7" width="18" height="14" rx="1.5" />
-        <path d="M8 7V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18" />
       </>
     ),
   },

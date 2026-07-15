@@ -9,9 +9,9 @@ import type { HistorialItem } from "../lib/api";
 const LIMIT = 20;
 
 const TIPO_INFO: Record<string, { label: string; ruta: string; color: string }> = {
-  TIENDA: { label: "Tienda", ruta: "/privadas", color: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300" },
+  TIENDA: { label: "Tienda", ruta: "/cotizaciones?formato=tienda", color: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300" },
   GUATECOMPRAS: { label: "Guatecompras", ruta: "/guatecompras/cotizacion", color: "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300" },
-  EMPRESAS: { label: "Empresas", ruta: "/empresas", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" },
+  EMPRESAS: { label: "Empresas", ruta: "/cotizaciones?formato=empresas", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" },
   CARTA: { label: "Carta de Garantía", ruta: "/guatecompras/carta-garantia", color: "bg-teal-100 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300" },
   PISCINA: { label: "Piscina", ruta: "/construccion-piscina", color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300" },
 };
@@ -141,7 +141,7 @@ export function HistorialGlobal({
                   <td className="px-4 py-2.5 text-zinc-500">{it.fecha || "—"}</td>
                   <td className="px-4 py-2.5 text-right">
                     <Link
-                      href={`${info.ruta}?id=${it.id}`}
+                      href={`${info.ruta}${info.ruta.includes("?") ? "&" : "?"}id=${it.id}`}
                       className="font-medium text-teal-700 hover:underline"
                     >
                       Abrir →

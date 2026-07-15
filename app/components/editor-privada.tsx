@@ -29,11 +29,13 @@ export function EditorPrivada({
   siguienteNumero,
   initialSelectedId,
   userEmail = "",
+  headerExtra,
 }: {
   initialCotizaciones: SavedCotizacionPrivada[];
   siguienteNumero: string;
   initialSelectedId?: string;
   userEmail?: string;
+  headerExtra?: React.ReactNode;
 }) {
   const [data, setData] = useState<CotizacionPrivadaData>(
     cotizacionPrivadaDefaults,
@@ -214,8 +216,9 @@ export function EditorPrivada({
             ← Inicio
           </Link>
           <h1 className="font-semibold text-zinc-800 dark:text-zinc-100">
-            Cotización de empresa
+            Cotización
           </h1>
+          {headerExtra}
         </div>
         <div className="flex items-center gap-2">
           <button
