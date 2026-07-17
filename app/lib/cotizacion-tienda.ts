@@ -42,11 +42,7 @@ export const tiendaDefaults: CotizacionTiendaData = {
     },
   ],
   otros: "0",
-  terminos: [
-    "Precio incluye instalacion.",
-    "Precio incluye Iva.",
-    "Precio incluye set de medicion de TDS.",
-  ],
+  terminos: ["Precio incluye Iva."],
 };
 
 // Defaults con la fecha de hoy (y "válido hasta" a 15 días). Se llama en el
