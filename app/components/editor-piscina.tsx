@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
-  piscinaDefaults,
+  piscinaDefaultsHoy,
   totalConIva,
   type PropuestaPiscinaData,
   type ComponenteTabla,
@@ -34,7 +34,7 @@ export function EditorPiscina({
   initialSelectedId?: string;
   userEmail?: string;
 }) {
-  const [data, setData] = useState<PropuestaPiscinaData>(piscinaDefaults);
+  const [data, setData] = useState<PropuestaPiscinaData>(piscinaDefaultsHoy);
   const [saved, setSaved] = useState<SavedPiscina[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [nombre, setNombre] = useState("");
@@ -111,7 +111,7 @@ export function EditorPiscina({
   }
 
   function handleNueva() {
-    setData(piscinaDefaults);
+    setData(piscinaDefaultsHoy());
     setCurrentId(null);
     setNombre("");
     setAutor(userEmail);

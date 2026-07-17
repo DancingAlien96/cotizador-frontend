@@ -1,4 +1,5 @@
 import { parseNum } from "./cotizacion-privada";
+import { fechaLarga, enMeses } from "./fecha-actual";
 
 export type ComponenteTabla = { nombre: string; op1: boolean; op2: boolean };
 export type FilaCronograma = { fase: string; duracion: string };
@@ -47,6 +48,14 @@ export function ivaDe(subtotal: string): number {
 }
 export function totalConIva(subtotal: string): number {
   return parseNum(subtotal) * (1 + IVA_RATE);
+}
+
+export function piscinaDefaultsHoy(): PropuestaPiscinaData {
+  return {
+    ...piscinaDefaults,
+    fechaEmision: fechaLarga(),
+    vigencia: fechaLarga(enMeses(2)),
+  };
 }
 
 export const piscinaDefaults: PropuestaPiscinaData = {

@@ -1,3 +1,5 @@
+import { fechaLarga } from "./fecha-actual";
+
 export type CartaData = {
   ciudad: string;
   fecha: string;
@@ -18,6 +20,10 @@ export type CartaData = {
   membreteTel1: string;
   membreteTel2: string;
 };
+
+export function cartaDefaultsHoy(): CartaData {
+  return { ...cartaDefaults, fecha: fechaLarga() };
+}
 
 export const cartaDefaults: CartaData = {
   ciudad: "Chiquimula",

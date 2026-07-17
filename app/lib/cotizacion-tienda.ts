@@ -1,4 +1,5 @@
 import { parseNum } from "./cotizacion-privada";
+import { fechaCorta, enDias } from "./fecha-actual";
 
 export type ItemTienda = {
   descripcion: string;
@@ -47,6 +48,16 @@ export const tiendaDefaults: CotizacionTiendaData = {
     "Precio incluye set de medicion de TDS.",
   ],
 };
+
+// Defaults con la fecha de hoy (y "válido hasta" a 15 días). Se llama en el
+// cliente al abrir una cotización nueva.
+export function tiendaDefaultsHoy(): CotizacionTiendaData {
+  return {
+    ...tiendaDefaults,
+    fecha: fechaCorta(),
+    validoHasta: fechaCorta(enDias(15)),
+  };
+}
 
 export function totalItemTienda(it: ItemTienda): number {
   return parseNum(it.precio) * parseNum(it.cantidad);

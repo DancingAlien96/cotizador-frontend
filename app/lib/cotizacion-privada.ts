@@ -1,3 +1,5 @@
+import { fechaLarga } from "./fecha-actual";
+
 export type ItemCotizacion = {
   cantidad: string;
   descripcion: string;
@@ -26,6 +28,10 @@ export type CotizacionPrivadaData = {
   items: ItemCotizacion[];
   observaciones: string[];
 };
+
+export function cotizacionPrivadaDefaultsHoy(): CotizacionPrivadaData {
+  return { ...cotizacionPrivadaDefaults, fecha: fechaLarga() };
+}
 
 export const cotizacionPrivadaDefaults: CotizacionPrivadaData = {
   fecha: "19 de mayo de 2026",

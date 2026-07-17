@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
-  cotizacionPrivadaDefaults,
+  cotizacionPrivadaDefaultsHoy,
   totalItem,
   totalGeneral,
   formatQ,
@@ -41,7 +41,7 @@ export function EditorPrivada({
   headerExtra?: React.ReactNode;
 }) {
   const [data, setData] = useState<CotizacionPrivadaData>(
-    cotizacionPrivadaDefaults,
+    cotizacionPrivadaDefaultsHoy,
   );
   const [saved, setSaved] = useState<SavedCotizacionPrivada[]>(
     initialCotizaciones,
@@ -121,7 +121,7 @@ export function EditorPrivada({
 
   // --- Cotizaciones guardadas ---
   function handleNueva() {
-    setData(cotizacionPrivadaDefaults);
+    setData(cotizacionPrivadaDefaultsHoy());
     setCurrentId(null);
     setNumero(proximoNumero);
     setNombre("");
@@ -170,7 +170,7 @@ export function EditorPrivada({
       setProximoNumero(res.siguienteNumero);
       onSiguienteNumero?.(res.siguienteNumero);
       if (id === currentId) {
-        setData(cotizacionPrivadaDefaults);
+        setData(cotizacionPrivadaDefaultsHoy());
         setCurrentId(null);
         setNumero(res.siguienteNumero);
       }

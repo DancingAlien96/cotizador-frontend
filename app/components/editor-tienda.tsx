@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
-  tiendaDefaults,
+  tiendaDefaultsHoy,
   totalItemTienda,
   totalTienda,
   type CotizacionTiendaData,
@@ -40,7 +40,7 @@ export function EditorTienda({
   userEmail?: string;
   headerExtra?: React.ReactNode;
 }) {
-  const [data, setData] = useState<CotizacionTiendaData>(tiendaDefaults);
+  const [data, setData] = useState<CotizacionTiendaData>(tiendaDefaultsHoy);
   const [saved, setSaved] = useState<SavedTienda[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [numero, setNumero] = useState(siguienteNumero);
@@ -117,7 +117,7 @@ export function EditorTienda({
   }
 
   function handleNueva() {
-    setData(tiendaDefaults);
+    setData(tiendaDefaultsHoy());
     setCurrentId(null);
     setNumero(proximoNumero);
     setNombre("");
@@ -165,7 +165,7 @@ export function EditorTienda({
       setProximoNumero(res.siguienteNumero);
       onSiguienteNumero?.(res.siguienteNumero);
       if (id === currentId) {
-        setData(tiendaDefaults);
+        setData(tiendaDefaultsHoy());
         setCurrentId(null);
         setNumero(res.siguienteNumero);
         setNombre("");

@@ -1,4 +1,5 @@
 import type { ItemCotizacion } from "./cotizacion-privada";
+import { fechaLarga } from "./fecha-actual";
 
 export type { ItemCotizacion };
 
@@ -25,6 +26,10 @@ export type CotizacionGuatecomprasData = {
   items: ItemCotizacion[];
   observaciones: string[];
 };
+
+export function guatecomprasDefaultsHoy(): CotizacionGuatecomprasData {
+  return { ...guatecomprasDefaults, fecha: fechaLarga() };
+}
 
 export const guatecomprasDefaults: CotizacionGuatecomprasData = {
   fecha: "01 de julio de 2026",

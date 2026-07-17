@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { cartaDefaults, cartaFields, type CartaData } from "../lib/carta";
+import { cartaDefaultsHoy, cartaFields, type CartaData } from "../lib/carta";
 import type { SavedCotizacion } from "../lib/store";
 import { CartaGarantia } from "./carta-garantia";
 import { saveCotizacion, removeCotizacion } from "../actions/cotizaciones";
@@ -45,7 +45,7 @@ export function Editor({
   prefillDesdeCotizacion?: boolean;
   userEmail?: string;
 }) {
-  const [data, setData] = useState<CartaData>(cartaDefaults);
+  const [data, setData] = useState<CartaData>(cartaDefaultsHoy);
   const [saved, setSaved] = useState<SavedCotizacion[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [nombre, setNombre] = useState("");
@@ -107,7 +107,7 @@ export function Editor({
   }
 
   function handleNueva() {
-    setData(cartaDefaults);
+    setData(cartaDefaultsHoy());
     setCurrentId(null);
     setNombre("");
     setAutor(userEmail);
@@ -358,7 +358,7 @@ export function Editor({
             ))}
 
             <button
-              onClick={() => setData(cartaDefaults)}
+              onClick={() => setData(cartaDefaultsHoy())}
               className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               Restaurar valores por defecto

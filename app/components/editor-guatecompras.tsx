@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
-  guatecomprasDefaults,
+  guatecomprasDefaultsHoy,
   type CotizacionGuatecomprasData,
 } from "../lib/cotizacion-guatecompras";
 import {
@@ -42,7 +42,7 @@ export function EditorGuatecompras({
   userEmail?: string;
 }) {
   const [data, setData] = useState<CotizacionGuatecomprasData>(
-    guatecomprasDefaults,
+    guatecomprasDefaultsHoy,
   );
   const [saved, setSaved] = useState<SavedGuatecompras[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
@@ -116,7 +116,7 @@ export function EditorGuatecompras({
 
   // --- Guardadas ---
   function handleNueva() {
-    setData(guatecomprasDefaults);
+    setData(guatecomprasDefaultsHoy());
     setCurrentId(null);
     setNombre("");
     setAutor(userEmail);
