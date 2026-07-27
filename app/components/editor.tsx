@@ -243,7 +243,7 @@ export function Editor({
 
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario + cotizaciones */}
-        <aside className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-96 lg:border-b-0 lg:border-r">
+        <aside spellCheck lang="es" className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-96 lg:border-b-0 lg:border-r">
           <div className="space-y-6">
             {/* --- Panel de cotizaciones --- */}
             <section className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
