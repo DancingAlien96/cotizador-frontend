@@ -21,6 +21,7 @@ import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
 import { ClienteAutocomplete } from "./cliente-autocomplete";
+import { AutocompleteTexto } from "./autocomplete-texto";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -354,7 +355,18 @@ export function EditorPrivada({
                   onSelect={(c) => set("clienteNombre", c.nombre)}
                   datosActuales={() => ({ nombre: data.clienteNombre })}
                 />
-                <Field label="Concepto de la oferta" value={data.concepto} onChange={(v) => set("concepto", v)} />
+                <label className="block">
+                  <span className="mb-1 block text-sm text-zinc-600 dark:text-zinc-400">
+                    Concepto de la oferta
+                  </span>
+                  <AutocompleteTexto
+                    campo="concepto"
+                    value={data.concepto}
+                    onChange={(v) => set("concepto", v)}
+                    rows={1}
+                    className={inputClass}
+                  />
+                </label>
               </div>
             </fieldset>
 
@@ -396,9 +408,10 @@ export function EditorPrivada({
                       <span className="mb-1 block text-xs text-zinc-500">
                         Descripción
                       </span>
-                      <textarea
+                      <AutocompleteTexto
+                        campo="descripcion"
                         value={it.descripcion}
-                        onChange={(e) => updateItem(i, "descripcion", e.target.value)}
+                        onChange={(v) => updateItem(i, "descripcion", v)}
                         rows={2}
                         className={inputClass}
                       />
@@ -449,11 +462,13 @@ export function EditorPrivada({
               <div className="space-y-2">
                 {data.observaciones.map((o, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <textarea
+                    <AutocompleteTexto
+                      campo="observacion"
                       value={o}
-                      onChange={(e) => updateObs(i, e.target.value)}
+                      onChange={(v) => updateObs(i, v)}
                       rows={2}
                       className={inputClass}
+                      wrapperClassName="relative flex-1"
                     />
                     <button
                       onClick={() => removeObs(i)}

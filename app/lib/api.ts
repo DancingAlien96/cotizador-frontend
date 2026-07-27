@@ -236,6 +236,13 @@ export type Cliente = {
   updatedAt: string;
 };
 
+export type CampoFrase = "descripcion" | "termino" | "observacion" | "concepto";
+
+export function apiFrases(campo: CampoFrase, q: string): Promise<string[]> {
+  const sp = new URLSearchParams({ campo, q });
+  return request<string[]>(`/api/frases?${sp.toString()}`);
+}
+
 export function apiClientes(params: { q?: string } = {}): Promise<Cliente[]> {
   const sp = new URLSearchParams();
   if (params.q) sp.set("q", params.q);

@@ -28,6 +28,7 @@ import {
   CARTA_PREFILL_KEY,
 } from "../lib/carta-desde-cotizacion";
 import { ClienteAutocomplete } from "./cliente-autocomplete";
+import { AutocompleteTexto } from "./autocomplete-texto";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -386,7 +387,7 @@ export function EditorGuatecompras({
                     </div>
                     <label className="mb-2 block">
                       <span className="mb-1 block text-xs text-zinc-500">Descripción</span>
-                      <textarea value={it.descripcion} onChange={(e) => updateItem(i, "descripcion", e.target.value)} rows={2} className={inputClass} />
+                      <AutocompleteTexto campo="descripcion" value={it.descripcion} onChange={(v) => updateItem(i, "descripcion", v)} rows={2} className={inputClass} />
                     </label>
                     <div className="flex gap-2">
                       <label className="flex-1">
@@ -417,7 +418,7 @@ export function EditorGuatecompras({
               <div className="space-y-2">
                 {data.observaciones.map((o, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <textarea value={o} onChange={(e) => updateObs(i, e.target.value)} rows={2} className={inputClass} />
+                    <AutocompleteTexto campo="observacion" value={o} onChange={(v) => updateObs(i, v)} rows={2} className={inputClass} wrapperClassName="relative flex-1" />
                     <button onClick={() => removeObs(i)} title="Quitar" className="mt-1.5 shrink-0 rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40">
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 6 6 18M6 6l12 12" />
