@@ -226,7 +226,14 @@ export function HistorialGlobal({
                   <td className="max-w-[10rem] truncate px-4 py-2.5 text-zinc-500">
                     {it.autor || "—"}
                   </td>
-                  <td className="px-4 py-2.5 text-zinc-500">{it.numero || "—"}</td>
+                  <td className="px-4 py-2.5 text-zinc-500">
+                    {it.numero || "—"}
+                    {it.version > 1 && (
+                      <span className="ml-1 text-[11px] text-teal-600 dark:text-teal-400">
+                        v{it.version}
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5 text-right text-zinc-700 dark:text-zinc-300">
                     {it.total != null ? formatQ(it.total) : "—"}
                   </td>

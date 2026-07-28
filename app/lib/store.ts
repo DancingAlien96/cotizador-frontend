@@ -3,6 +3,7 @@ import type { CartaData } from "./carta";
 
 export type SavedCotizacion = {
   id: string;
+  version: number;
   nombre: string;
   autor: string;
   data: CartaData;
@@ -20,6 +21,7 @@ function map(r: ApiRecord): SavedCotizacion {
   const env = r.data as CartaEnvelope;
   return {
     id: r.id,
+    version: r.version ?? 1,
     nombre: r.nombre ?? env?.nombre ?? "",
     autor: r.autor ?? "",
     data: env?.carta ?? ({} as CartaData),

@@ -3,6 +3,7 @@ import { totalConIva, type PropuestaPiscinaData } from "./propuesta-piscina";
 
 export type SavedPiscina = {
   id: string;
+  version: number;
   nombre: string;
   autor: string;
   data: PropuestaPiscinaData;
@@ -15,6 +16,7 @@ const TIPO = "piscina";
 function map(r: ApiRecord): SavedPiscina {
   return {
     id: r.id,
+    version: r.version ?? 1,
     nombre: r.nombre ?? "",
     autor: r.autor ?? "",
     data: r.data as PropuestaPiscinaData,

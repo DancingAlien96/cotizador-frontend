@@ -11,6 +11,7 @@ import { totalTienda, type CotizacionTiendaData } from "./cotizacion-tienda";
 export type SavedTienda = {
   id: string;
   numero: string;
+  version: number;
   nombre: string;
   autor: string;
   data: CotizacionTiendaData;
@@ -24,6 +25,7 @@ function map(r: ApiRecord): SavedTienda {
   return {
     id: r.id,
     numero: r.numero ?? "",
+    version: r.version ?? 1,
     nombre: r.nombre ?? "",
     autor: r.autor ?? "",
     data: r.data as CotizacionTiendaData,

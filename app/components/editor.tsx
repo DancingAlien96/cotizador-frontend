@@ -14,6 +14,7 @@ import { DraftBanner } from "./draft-banner";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
 import { CARTA_PREFILL_KEY } from "../lib/carta-desde-cotizacion";
+import { VersionesControls } from "./versiones-controls";
 
 function defaultNombre(data: CartaData): string {
   const inst = data.institucion.trim();
@@ -54,6 +55,8 @@ export function Editor({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [version, setVersion] = useState(1);
+  const [viendoVersion, setViendoVersion] = useState<number | null>(null);
   const cartaRef = useRef<HTMLDivElement>(null);
 
   const { draft, canRestore, clear: clearDraft } = useDraft("carta", {
@@ -109,6 +112,8 @@ export function Editor({
   function handleNueva() {
     setData(cartaDefaultsHoy());
     setCurrentId(null);
+    setVersion(1);
+    setViendoVersion(null);
     setNombre("");
     setAutor(userEmail);
     clearDraft();
@@ -117,6 +122,8 @@ export function Editor({
   function handleCargar(item: SavedCotizacion) {
     setData(item.data);
     setCurrentId(item.id);
+    setVersion(item.version);
+    setViendoVersion(null);
     setNombre(item.nombre);
     setAutor(item.autor || userEmail);
   }
@@ -158,6 +165,8 @@ export function Editor({
       });
       setSaved(all);
       setCurrentId(item.id);
+      setVersion(item.version);
+      setViendoVersion(null);
       setNombre(item.nombre);
       clearDraft();
       setSaveOpen(false);
@@ -216,6 +225,25 @@ export function Editor({
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
       )}
 
+      {viendoVersion != null && (
+        <div className="no-print flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          <span>
+            Viendo la versión <strong>v{viendoVersion}</strong> (archivada). Puedes
+            imprimirla o descargarla. Para dejarla como la actual, usa
+            &quot;Guardar como nueva versión&quot;.
+          </span>
+          <button
+            onClick={() => {
+              const item = saved.find((s) => s.id === currentId);
+              if (item) handleCargar(item);
+            }}
+            className="shrink-0 font-medium text-amber-700 hover:underline dark:text-amber-300"
+          >
+            Volver a la actual
+          </button>
+        </div>
+      )}
+
       {prefilled && (
         <div className="no-print flex items-center justify-between gap-3 border-b border-teal-200 bg-teal-50 px-4 py-2 text-sm text-teal-800 dark:border-teal-900 dark:bg-teal-950 dark:text-teal-200">
           <span>
@@ -249,7 +277,7 @@ export function Editor({
             <section className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">
-                  Cotización
+                  Cotización{currentId && version > 1 ? ` · v${version}` : ""}
                 </span>
                 {currentId ? (
                   <span className="text-[11px] text-zinc-400">Editando</span>
@@ -330,6 +358,35 @@ export function Editor({
                 </ul>
               )}
             </section>
+
+            <VersionesControls
+              tipo="carta"
+              currentId={currentId}
+              version={version}
+              getBody={() => ({
+                // La carta se guarda envuelta { nombre, carta } (ver store.ts).
+                data: { nombre: nombre || defaultNombre(data), carta: data },
+                nombre: nombre || defaultNombre(data),
+                autor,
+                cliente: data.institucion || nombre,
+                fecha: data.fecha,
+              })}
+              onNuevaVersion={(rec) => {
+                setVersion(rec.version);
+                setViendoVersion(null);
+                setSaved((prev) =>
+                  prev.map((it) =>
+                    it.id === rec.id ? { ...it, version: rec.version, nombre, data } : it,
+                  ),
+                );
+              }}
+              onAbrirSnapshot={(snap, meta) => {
+                const env = snap as { nombre?: string; carta?: CartaData };
+                if (env?.carta) setData(env.carta);
+                setViendoVersion(meta.version);
+              }}
+              disabled={isPending}
+            />
 
             {/* --- Campos del documento --- */}
             {cartaFields.map((group) => (

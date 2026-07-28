@@ -19,6 +19,7 @@ import { wordBodyPiscina } from "../lib/word-bodies";
 import { useDraft } from "../lib/use-draft";
 import { DraftBanner } from "./draft-banner";
 import { ClienteAutocomplete } from "./cliente-autocomplete";
+import { VersionesControls } from "./versiones-controls";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
 
@@ -37,6 +38,8 @@ export function EditorPiscina({
   const [data, setData] = useState<PropuestaPiscinaData>(piscinaDefaultsHoy);
   const [saved, setSaved] = useState<SavedPiscina[]>(initialCotizaciones);
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [version, setVersion] = useState(1);
+  const [viendoVersion, setViendoVersion] = useState<number | null>(null);
   const [nombre, setNombre] = useState("");
   const [autor, setAutor] = useState(userEmail);
   const [saveOpen, setSaveOpen] = useState(false);
@@ -113,6 +116,8 @@ export function EditorPiscina({
   function handleNueva() {
     setData(piscinaDefaultsHoy());
     setCurrentId(null);
+    setVersion(1);
+    setViendoVersion(null);
     setNombre("");
     setAutor(userEmail);
     clearDraft();
@@ -120,6 +125,8 @@ export function EditorPiscina({
   function handleCargar(item: SavedPiscina) {
     setData(item.data);
     setCurrentId(item.id);
+    setVersion(item.version);
+    setViendoVersion(null);
     setNombre(item.nombre);
     setAutor(item.autor || userEmail);
   }
@@ -142,6 +149,8 @@ export function EditorPiscina({
       });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      setVersion(res.saved.version);
+      setViendoVersion(null);
       clearDraft();
       setSaveOpen(false);
     });
@@ -229,6 +238,25 @@ export function EditorPiscina({
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
       )}
 
+      {viendoVersion != null && (
+        <div className="no-print flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          <span>
+            Viendo la versión <strong>v{viendoVersion}</strong> (archivada). Puedes
+            imprimirla o descargarla. Para dejarla como la actual, usa
+            &quot;Guardar como nueva versión&quot;.
+          </span>
+          <button
+            onClick={() => {
+              const item = saved.find((s) => s.id === currentId);
+              if (item) handleCargar(item);
+            }}
+            className="shrink-0 font-medium text-amber-700 hover:underline dark:text-amber-300"
+          >
+            Volver a la actual
+          </button>
+        </div>
+      )}
+
       {saveOpen && (
         <SaveDialog
           initialNombre={nombre || `Piscina — ${data.cliente}`.trim()}
@@ -245,7 +273,9 @@ export function EditorPiscina({
             {/* Guardadas */}
             <section className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">Propuesta</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+                  Propuesta{currentId && version > 1 ? ` · v${version}` : ""}
+                </span>
                 <span className="text-[11px] text-zinc-400">{currentId ? "Editando" : "Nueva"}</span>
               </div>
               <div className="flex gap-2">
@@ -272,6 +302,35 @@ export function EditorPiscina({
                 </ul>
               )}
             </section>
+
+            <VersionesControls
+              tipo="piscina"
+              currentId={currentId}
+              version={version}
+              getBody={() => ({
+                data,
+                nombre,
+                autor,
+                cliente: data.cliente,
+                total: totalConIva(data.subtotalOp2),
+                fecha: data.fechaEmision,
+              })}
+              onNuevaVersion={(rec) => {
+                setVersion(rec.version);
+                setViendoVersion(null);
+                setSaved((prev) =>
+                  prev.map((it) =>
+                    it.id === rec.id ? { ...it, version: rec.version, nombre, data } : it,
+                  ),
+                );
+              }}
+              onAbrirSnapshot={(snap, meta) => {
+                setData(snap as PropuestaPiscinaData);
+                setViendoVersion(meta.version);
+              }}
+              formatTotal={formatQ}
+              disabled={isPending}
+            />
 
             {/* Portada */}
             <Grupo titulo="Portada">

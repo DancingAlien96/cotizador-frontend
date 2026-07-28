@@ -22,6 +22,7 @@ import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
 import { ClienteAutocomplete } from "./cliente-autocomplete";
 import { AutocompleteTexto } from "./autocomplete-texto";
+import { VersionesControls } from "./versiones-controls";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -48,6 +49,8 @@ export function EditorPrivada({
     initialCotizaciones,
   );
   const [currentId, setCurrentId] = useState<string | null>(null);
+  const [version, setVersion] = useState(1);
+  const [viendoVersion, setViendoVersion] = useState<number | null>(null);
   const [numero, setNumero] = useState(siguienteNumero);
   const [proximoNumero, setProximoNumero] = useState(siguienteNumero);
   const [nombre, setNombre] = useState("");
@@ -124,6 +127,8 @@ export function EditorPrivada({
   function handleNueva() {
     setData(cotizacionPrivadaDefaultsHoy());
     setCurrentId(null);
+    setVersion(1);
+    setViendoVersion(null);
     setNumero(proximoNumero);
     setNombre("");
     setAutor(userEmail);
@@ -132,6 +137,8 @@ export function EditorPrivada({
   function handleCargar(item: SavedCotizacionPrivada) {
     setData(item.data);
     setCurrentId(item.id);
+    setVersion(item.version);
+    setViendoVersion(null);
     setNumero(item.numero);
     setNombre(item.nombre);
     setAutor(item.autor || userEmail);
@@ -156,6 +163,8 @@ export function EditorPrivada({
       });
       setSaved(res.all);
       setCurrentId(res.saved.id);
+      setVersion(res.saved.version);
+      setViendoVersion(null);
       setNumero(res.saved.numero);
       setProximoNumero(res.siguienteNumero);
       onSiguienteNumero?.(res.siguienteNumero);
@@ -254,6 +263,25 @@ export function EditorPrivada({
         <DraftBanner onRestore={restaurarBorrador} onDismiss={clearDraft} />
       )}
 
+      {viendoVersion != null && (
+        <div className="no-print flex items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          <span>
+            Viendo la versión <strong>v{viendoVersion}</strong> (archivada). Puedes
+            imprimirla o descargarla. Para dejarla como la actual, usa
+            &quot;Guardar como nueva versión&quot;.
+          </span>
+          <button
+            onClick={() => {
+              const item = saved.find((s) => s.id === currentId);
+              if (item) handleCargar(item);
+            }}
+            className="shrink-0 font-medium text-amber-700 hover:underline dark:text-amber-300"
+          >
+            Volver a la actual
+          </button>
+        </div>
+      )}
+
       {saveOpen && (
         <SaveDialog
           initialNombre={nombre || `Empresas — ${data.clienteNombre}`.trim()}
@@ -273,6 +301,7 @@ export function EditorPrivada({
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wide text-teal-700">
                   Cotización No. {numero}
+                  {currentId && version > 1 ? ` · v${version}` : ""}
                 </span>
                 <span className="text-[11px] text-zinc-400">
                   {currentId ? "Editando" : "Nueva"}
@@ -340,6 +369,35 @@ export function EditorPrivada({
                 </ul>
               )}
             </section>
+
+            <VersionesControls
+              tipo="empresas"
+              currentId={currentId}
+              version={version}
+              getBody={() => ({
+                data,
+                nombre,
+                autor,
+                cliente: data.clienteNombre,
+                total: totalGeneral(data.items),
+                fecha: data.fecha,
+              })}
+              onNuevaVersion={(rec) => {
+                setVersion(rec.version);
+                setViendoVersion(null);
+                setSaved((prev) =>
+                  prev.map((it) =>
+                    it.id === rec.id ? { ...it, version: rec.version, nombre, data } : it,
+                  ),
+                );
+              }}
+              onAbrirSnapshot={(snap, meta) => {
+                setData(snap as CotizacionPrivadaData);
+                setViendoVersion(meta.version);
+              }}
+              formatTotal={formatQ}
+              disabled={isPending}
+            />
 
             {/* Datos generales */}
             <fieldset>

@@ -39,12 +39,51 @@ export type ApiRecord = {
   id: string;
   tipo: string;
   numero: string | null;
+  version: number;
   nombre?: string | null;
   autor?: string | null;
   data: unknown;
   createdAt: string;
   updatedAt: string;
 };
+
+// Metadatos de una versión anterior (snapshot) de una cotización.
+export type VersionMeta = {
+  id: string;
+  version: number;
+  nombre: string | null;
+  autor: string | null;
+  cliente: string | null;
+  total: number | null;
+  fecha: string | null;
+  createdAt: string;
+};
+
+export function apiSaveVersion(
+  tipo: string,
+  id: string,
+  body: { data: unknown } & Resumen,
+): Promise<ApiRecord> {
+  return request<ApiRecord>(
+    `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}/version`,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export function apiVersiones(tipo: string, id: string): Promise<VersionMeta[]> {
+  return request<VersionMeta[]>(
+    `/api/cotizaciones/${safeTipo(tipo)}/${encodeURIComponent(safeId(id))}/versiones`,
+  );
+}
+
+export function apiVersion(
+  tipo: string,
+  versionId: string,
+): Promise<VersionMeta & { data: unknown }> {
+  return request(
+    `/api/cotizaciones/${safeTipo(tipo)}/version/${encodeURIComponent(safeId(versionId))}`,
+  );
+}
 
 // Usa el JWT del usuario (cookie de sesión) para llamar a la API.
 async function request<T>(
@@ -104,6 +143,7 @@ export type HistorialItem = {
   id: string;
   tipo: string;
   numero: string | null;
+  version: number;
   nombre: string | null;
   autor: string | null;
   cliente: string | null;

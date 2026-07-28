@@ -14,6 +14,7 @@ import { totalGeneral, type CotizacionPrivadaData } from "./cotizacion-privada";
 export type SavedCotizacionPrivada = {
   id: string;
   numero: string;
+  version: number;
   nombre: string;
   autor: string;
   data: CotizacionPrivadaData;
@@ -27,6 +28,7 @@ function map(r: ApiRecord): SavedCotizacionPrivada {
   return {
     id: r.id,
     numero: r.numero ?? "",
+    version: r.version ?? 1,
     nombre: r.nombre ?? "",
     autor: r.autor ?? "",
     data: r.data as CotizacionPrivadaData,
