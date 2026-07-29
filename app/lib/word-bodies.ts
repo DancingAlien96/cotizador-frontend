@@ -37,6 +37,43 @@ const TD = 'style="border:1px solid #000;padding:5pt;vertical-align:top"';
 const TH = `style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center"`;
 const FIRMA = '<img src="/selloyfirma.png" style="width:5.5cm" />';
 
+// Recuadro de datos (empresa + cliente) para Word, con bordes vía tabla.
+function cuadroDatosWord(c: {
+  empresaNombre: string;
+  empresaNit: string;
+  empresaDireccion: string;
+  asesor: string;
+  empresaCelular: string;
+  empresaCorreo: string;
+  fecha: string;
+  validez: string;
+  clienteNombre: string;
+  clienteNit: string;
+  clienteCelular: string;
+  clienteCorreo: string;
+}): string {
+  const l = (et: string, v: string) => `<b>${et}:</b> ${esc(v)}<br />`;
+  return `
+<table style="width:100%;border:1px solid #444;border-collapse:collapse;margin-bottom:8pt">
+  <tr><td style="border-bottom:1px solid #444;padding:5pt;font-size:10pt">
+    ${l("Nombre de la empresa", c.empresaNombre)}
+    ${l("Nit", c.empresaNit)}
+    ${l("Dirección", c.empresaDireccion)}
+    ${l("Asesor de venta", c.asesor)}
+    ${l("Celular", c.empresaCelular)}
+    ${l("Correo", c.empresaCorreo)}
+    ${l("Fecha", c.fecha)}
+    ${l("Validez", c.validez)}
+  </td></tr>
+  <tr><td style="padding:5pt;font-size:10pt">
+    ${l("Cliente", c.clienteNombre)}
+    ${l("Nit", c.clienteNit)}
+    ${l("Celular", c.clienteCelular)}
+    ${l("Correo", c.clienteCorreo)}
+  </td></tr>
+</table>`;
+}
+
 // ---------- Empresas ----------
 export function wordBodyEmpresas(
   data: CotizacionPrivadaData,
@@ -59,6 +96,21 @@ export function wordBodyEmpresas(
     <p><b>Cotización No. ${esc(numero)}</b></p>
   </td>
 </tr></table>
+
+${cuadroDatosWord({
+  empresaNombre: data.empresaNombre,
+  empresaNit: data.empresaNit,
+  empresaDireccion: data.empresaDireccion,
+  asesor: data.asesorNombre,
+  empresaCelular: data.asesorTelefono,
+  empresaCorreo: data.asesorCorreo,
+  fecha: data.fecha,
+  validez: data.validez,
+  clienteNombre: data.clienteNombre,
+  clienteNit: data.clienteNit,
+  clienteCelular: data.clienteCelular,
+  clienteCorreo: data.clienteCorreo,
+})}
 
 <p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>
 <p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica para ${esc(data.concepto)}:</p>
@@ -114,6 +166,21 @@ export function wordBodyTienda(
     </table>
   </td>
 </tr></table>
+
+${cuadroDatosWord({
+  empresaNombre: data.empresaNombre,
+  empresaNit: data.empresaNit,
+  empresaDireccion: data.empresaDireccion,
+  asesor: data.asesor,
+  empresaCelular: data.empresaCelular,
+  empresaCorreo: data.empresaCorreo,
+  fecha: data.fecha,
+  validez: data.validez,
+  clienteNombre: data.cliente,
+  clienteNit: data.nitCliente,
+  clienteCelular: data.clienteCelular,
+  clienteCorreo: data.clienteCorreo,
+})}
 
 <p style="background:#27aae1;color:#fff;padding:3pt"><b>CLIENTE</b></p>
 <p><b>${esc(data.cliente)}</b><br /><b>NIT: ${esc(data.nitCliente)}</b></p>

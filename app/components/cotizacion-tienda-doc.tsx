@@ -1,4 +1,5 @@
 import { MembreteHeader, MembreteFooter } from "./membrete";
+import { CuadroDatos } from "./cuadro-datos";
 import { formatQ } from "../lib/cotizacion-privada";
 import {
   totalItemTienda,
@@ -61,6 +62,22 @@ export function CotizacionTiendaDoc({
             </table>
           </div>
         </div>
+
+        {/* Recuadro de datos (empresa + cliente) */}
+        <CuadroDatos
+          empresaNombre={data.empresaNombre}
+          empresaNit={data.empresaNit}
+          empresaDireccion={data.empresaDireccion}
+          asesor={data.asesor}
+          empresaCelular={data.empresaCelular}
+          empresaCorreo={data.empresaCorreo}
+          fecha={data.fecha}
+          validez={data.validez}
+          clienteNombre={data.cliente}
+          clienteNit={data.nitCliente}
+          clienteCelular={data.clienteCelular}
+          clienteCorreo={data.clienteCorreo}
+        />
 
         {/* Cliente */}
         <div className="tienda-bar mb-1">CLIENTE</div>

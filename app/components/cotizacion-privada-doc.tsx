@@ -7,6 +7,7 @@ import {
 } from "../lib/cotizacion-privada";
 import { quetzalesEnLetras } from "../lib/numero-a-letras";
 import { MembreteHeader, MembreteFooter } from "./membrete";
+import { CuadroDatos } from "./cuadro-datos";
 
 export function CotizacionPrivadaDoc({
   data,
@@ -61,6 +62,22 @@ export function CotizacionPrivadaDoc({
           </div>
           <p className="whitespace-nowrap font-bold">Cotización No. {numero}</p>
         </div>
+
+        {/* Recuadro de datos (empresa + cliente) */}
+        <CuadroDatos
+          empresaNombre={data.empresaNombre}
+          empresaNit={data.empresaNit}
+          empresaDireccion={data.empresaDireccion}
+          asesor={data.asesorNombre}
+          empresaCelular={data.asesorTelefono}
+          empresaCorreo={data.asesorCorreo}
+          fecha={data.fecha}
+          validez={data.validez}
+          clienteNombre={data.clienteNombre}
+          clienteNit={data.clienteNit}
+          clienteCelular={data.clienteCelular}
+          clienteCorreo={data.clienteCorreo}
+        />
 
         {/* Destinatario */}
         <div className="mb-3">
