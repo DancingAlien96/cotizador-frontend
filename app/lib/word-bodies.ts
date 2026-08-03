@@ -82,20 +82,7 @@ export function wordBodyEmpresas(
   const items = data.items.filter((i) => i.descripcion.trim() || i.cantidad.trim());
   const total = totalGeneral(items);
   return `
-<table style="width:100%"><tr>
-  <td style="vertical-align:top">
-    <p><b>Fecha:</b> ${esc(data.fecha)}<br />
-    <b>Nombre de la empresa:</b> ${esc(data.empresaNombre)}<br />
-    <b>Dirección fiscal de la empresa:</b> ${esc(data.empresaDireccion)}<br />
-    <b>Nit:</b> ${esc(data.empresaNit)}<br />
-    <b>Número de teléfono:</b> ${esc(data.asesorTelefono)} / 4004-5414<br />
-    <b>Correo electrónico:</b> ${esc(data.asesorCorreo)}<br />
-    <b>Asesora de venta:</b> ${esc(data.asesorNombre)}</p>
-  </td>
-  <td style="vertical-align:top;text-align:right;white-space:nowrap">
-    <p><b>Cotización No. ${esc(numero)}</b></p>
-  </td>
-</tr></table>
+<p style="text-align:right"><b>Cotización No. ${esc(numero)}</b></p>
 
 ${cuadroDatosWord({
   empresaNombre: data.empresaNombre,
@@ -155,17 +142,10 @@ export function wordBodyTienda(
   const subtotal = subtotalTienda(items);
   const total = totalTienda(items, data.otros);
   return `
-<table style="width:100%"><tr>
-  <td style="vertical-align:top"><p><b>Asesor de venta:</b> ${esc(data.asesor)}</p></td>
-  <td style="vertical-align:top;text-align:right">
-    <p style="font-size:18pt;color:#27aae1"><b>COTIZACIÓN</b></p>
-    <table style="margin-left:auto">
-      <tr><td ${TD}><b>COTIZACIÓN No.</b></td><td ${TD}><b>${esc(numero)}</b></td></tr>
-      <tr><td ${TD}><b>FECHA</b></td><td ${TD}>${esc(data.fecha)}</td></tr>
-      <tr><td ${TD}><b>VALIDO HASTA</b></td><td ${TD}>${esc(data.validoHasta)}</td></tr>
-    </table>
-  </td>
-</tr></table>
+<p style="text-align:right;font-size:18pt;color:#27aae1"><b>COTIZACIÓN</b></p>
+<table style="margin-left:auto;margin-bottom:8pt">
+  <tr><td ${TD}><b>COTIZACIÓN No.</b></td><td ${TD}><b>${esc(numero)}</b></td></tr>
+</table>
 
 ${cuadroDatosWord({
   empresaNombre: data.empresaNombre,
@@ -181,9 +161,6 @@ ${cuadroDatosWord({
   clienteCelular: data.clienteCelular,
   clienteCorreo: data.clienteCorreo,
 })}
-
-<p style="background:#27aae1;color:#fff;padding:3pt"><b>CLIENTE</b></p>
-<p><b>${esc(data.cliente)}</b><br /><b>NIT: ${esc(data.nitCliente)}</b></p>
 
 <table style="width:100%">
   <tr>
