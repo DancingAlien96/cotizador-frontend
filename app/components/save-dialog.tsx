@@ -5,6 +5,14 @@ import { useState } from "react";
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
 
+// Autores posibles de una cotización.
+export const AUTORES = [
+  "Ruben Regalado",
+  "Isa Regalado",
+  "Eduardo Regalado",
+  "Dulce Barrera",
+];
+
 export function SaveDialog({
   initialNombre,
   initialAutor,
@@ -19,7 +27,11 @@ export function SaveDialog({
   onCancel: () => void;
 }) {
   const [nombre, setNombre] = useState(initialNombre);
-  const [autor, setAutor] = useState(initialAutor);
+  // El autor es uno de los 4 fijos; si el valor previo no está en la lista,
+  // se preselecciona el primero.
+  const [autor, setAutor] = useState(
+    AUTORES.includes(initialAutor) ? initialAutor : AUTORES[0],
+  );
 
   return (
     <div
@@ -51,11 +63,17 @@ export function SaveDialog({
           <span className="mb-1 block text-sm text-zinc-600 dark:text-zinc-400">
             Autor
           </span>
-          <input
+          <select
             value={autor}
             onChange={(e) => setAutor(e.target.value)}
             className={inputClass}
-          />
+          >
+            {AUTORES.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
         </label>
 
         <div className="flex justify-end gap-2">
