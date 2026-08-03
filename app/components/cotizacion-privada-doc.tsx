@@ -1,12 +1,12 @@
 import {
   type CotizacionPrivadaData,
+  TELEFONO_EMPRESA,
   totalItem,
   totalGeneral,
   formatQ,
 } from "../lib/cotizacion-privada";
 import { quetzalesEnLetras } from "../lib/numero-a-letras";
 import { MembreteHeader, MembreteFooter } from "./membrete";
-import { CuadroDatos } from "./cuadro-datos";
 
 export function CotizacionPrivadaDoc({
   data,
@@ -29,26 +29,38 @@ export function CotizacionPrivadaDoc({
       />
 
       <div className="cotizacion-body">
-        {/* Número de cotización */}
-        <div className="mb-2 text-right">
-          <p className="font-bold">Cotización No. {numero}</p>
+        {/* Datos del emisor */}
+        <div className="mb-4 flex items-start justify-between">
+          <div>
+            <p>
+              <span className="font-bold">Fecha:</span> {data.fecha}
+            </p>
+            <p>
+              <span className="font-bold">Nombre de la empresa:</span>{" "}
+              {data.empresaNombre}
+            </p>
+            <p>
+              <span className="font-bold">Dirección fiscal de la empresa:</span>{" "}
+              {data.empresaDireccion}
+            </p>
+            <p>
+              <span className="font-bold">Nit:</span> {data.empresaNit}
+            </p>
+            <p>
+              <span className="font-bold">Número de teléfono:</span>{" "}
+              {data.asesorTelefono} / {TELEFONO_EMPRESA}
+            </p>
+            <p>
+              <span className="font-bold">Correo electrónico:</span>{" "}
+              <span className="text-blue-700 underline">{data.asesorCorreo}</span>
+            </p>
+            <p>
+              <span className="font-bold">Asesora de venta:</span>{" "}
+              {data.asesorNombre}
+            </p>
+          </div>
+          <p className="whitespace-nowrap font-bold">Cotización No. {numero}</p>
         </div>
-
-        {/* Recuadro de datos (empresa + cliente) */}
-        <CuadroDatos
-          empresaNombre={data.empresaNombre}
-          empresaNit={data.empresaNit}
-          empresaDireccion={data.empresaDireccion}
-          asesor={data.asesorNombre}
-          empresaCelular={data.asesorTelefono}
-          empresaCorreo={data.asesorCorreo}
-          fecha={data.fecha}
-          validez={data.validez}
-          clienteNombre={data.clienteNombre}
-          clienteNit={data.clienteNit}
-          clienteCelular={data.clienteCelular}
-          clienteCorreo={data.clienteCorreo}
-        />
 
         {/* Destinatario */}
         <div className="mb-3">

@@ -18,15 +18,6 @@ export type CotizacionTiendaData = {
   membreteCorreo: string;
   membreteTel1: string;
   membreteTel2: string;
-  // Recuadro de datos (empresa emisora + contacto del cliente)
-  empresaNombre: string;
-  empresaNit: string;
-  empresaDireccion: string;
-  empresaCelular: string;
-  empresaCorreo: string;
-  validez: string;
-  clienteCelular: string;
-  clienteCorreo: string;
   items: ItemTienda[];
   otros: string;
   terminos: string[];
@@ -41,14 +32,6 @@ export const tiendaDefaults: CotizacionTiendaData = {
   membreteCorreo: "eregalado@aquaequipos.com",
   membreteTel1: "+502 3340 7786",
   membreteTel2: "4004 5414",
-  empresaNombre: "PROMESA",
-  empresaNit: "1654601-6",
-  empresaDireccion: "8va Avenida lote 17 Zona 2, Chiquimula",
-  empresaCelular: "3340 7786 / 4004 5414",
-  empresaCorreo: "eregalado@aquaequipos.com",
-  validez: "20 días calendario",
-  clienteCelular: "",
-  clienteCorreo: "",
   items: [
     {
       descripcion:

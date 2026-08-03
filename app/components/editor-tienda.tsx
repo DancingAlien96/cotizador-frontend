@@ -362,41 +362,14 @@ export function EditorTienda({
                       ...prev,
                       cliente: c.nombre,
                       nitCliente: c.nit ?? prev.nitCliente,
-                      clienteCelular: c.telefono ?? prev.clienteCelular,
-                      clienteCorreo: c.correo ?? prev.clienteCorreo,
                     }))
                   }
                   datosActuales={() => ({
                     nombre: data.cliente,
                     nit: data.nitCliente,
-                    telefono: data.clienteCelular,
-                    correo: data.clienteCorreo,
                   })}
                 />
                 <Field label="NIT del cliente" value={data.nitCliente} onChange={(v) => set("nitCliente", v)} />
-              </div>
-            </fieldset>
-
-            {/* Recuadro de datos (empresa + contacto del cliente) */}
-            <fieldset>
-              <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-teal-700">Recuadro de datos</legend>
-              <div className="space-y-3">
-                <p className="text-[11px] text-zinc-400">Datos de la empresa</p>
-                <Field label="Nombre de la empresa" value={data.empresaNombre} onChange={(v) => set("empresaNombre", v)} />
-                <div className="flex gap-2">
-                  <Field label="NIT de la empresa" value={data.empresaNit} onChange={(v) => set("empresaNit", v)} />
-                  <Field label="Validez" value={data.validez} onChange={(v) => set("validez", v)} />
-                </div>
-                <Field label="Dirección" value={data.empresaDireccion} onChange={(v) => set("empresaDireccion", v)} />
-                <div className="flex gap-2">
-                  <Field label="Celular (empresa)" value={data.empresaCelular} onChange={(v) => set("empresaCelular", v)} />
-                  <Field label="Correo (empresa)" value={data.empresaCorreo} onChange={(v) => set("empresaCorreo", v)} />
-                </div>
-                <p className="pt-1 text-[11px] text-zinc-400">Contacto del cliente</p>
-                <div className="flex gap-2">
-                  <Field label="Celular (cliente)" value={data.clienteCelular} onChange={(v) => set("clienteCelular", v)} />
-                  <Field label="Correo (cliente)" value={data.clienteCorreo} onChange={(v) => set("clienteCorreo", v)} />
-                </div>
               </div>
             </fieldset>
 
