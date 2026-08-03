@@ -1,4 +1,5 @@
 import { MembreteHeader, MembreteFooter } from "./membrete";
+import { CuadroDatos } from "./cuadro-datos";
 import { formatQ } from "../lib/cotizacion-privada";
 import {
   totalItemTienda,
@@ -32,42 +33,36 @@ export function CotizacionTiendaDoc({
       />
 
       <div className="cotizacion-body">
-        {/* Encabezado: asesor y COTIZACIÓN + fechas */}
-        <div className="mb-3 flex items-start justify-between">
-          <div className="pt-6">
-            <p>
-              <b>Asesor de venta:</b> {data.asesor}
-            </p>
-          </div>
-          <div className="text-right">
-            <h2 className="mb-1 text-2xl font-bold tracking-wide text-[#27aae1]">
-              COTIZACIÓN
-            </h2>
-            <table className="tabla-fechas ml-auto">
-              <tbody>
-                <tr>
-                  <td className="font-bold">COTIZACIÓN No.</td>
-                  <td className="font-bold">{numero}</td>
-                </tr>
-                <tr>
-                  <td className="font-bold">FECHA</td>
-                  <td>{data.fecha}</td>
-                </tr>
-                <tr>
-                  <td className="font-bold">VALIDO HASTA</td>
-                  <td>{data.validoHasta}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        {/* Encabezado: COTIZACIÓN + No. */}
+        <div className="mb-3 text-right">
+          <h2 className="mb-1 text-2xl font-bold tracking-wide text-[#27aae1]">
+            COTIZACIÓN
+          </h2>
+          <table className="tabla-fechas ml-auto">
+            <tbody>
+              <tr>
+                <td className="font-bold">COTIZACIÓN No.</td>
+                <td className="font-bold">{numero}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        {/* Cliente */}
-        <div className="tienda-bar mb-1">CLIENTE</div>
-        <p className="font-bold">{data.cliente}</p>
-        <p className="mb-3 font-bold text-blue-700 underline">
-          NIT: {data.nitCliente}
-        </p>
+        {/* Recuadro de datos (empresa + cliente) */}
+        <CuadroDatos
+          empresaNombre={data.empresaNombre}
+          empresaNit={data.empresaNit}
+          empresaDireccion={data.empresaDireccion}
+          asesor={data.asesor}
+          empresaCelular={data.empresaCelular}
+          empresaCorreo={data.empresaCorreo}
+          fecha={data.fecha}
+          validez={data.validez}
+          clienteNombre={data.cliente}
+          clienteNit={data.nitCliente}
+          clienteCelular={data.clienteCelular}
+          clienteCorreo={data.clienteCorreo}
+        />
 
         {/* Tabla */}
         <table className="tabla-tienda">

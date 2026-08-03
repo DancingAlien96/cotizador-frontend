@@ -22,6 +22,11 @@ export type CotizacionPrivadaData = {
   membreteTel2: string;
   // Cliente / destinatario
   clienteNombre: string;
+  clienteNit: string;
+  clienteCelular: string;
+  clienteCorreo: string;
+  // Validez de la oferta (recuadro de datos)
+  validez: string;
   // Concepto de la oferta
   concepto: string;
   // Ítems y observaciones
@@ -45,6 +50,10 @@ export const cotizacionPrivadaDefaults: CotizacionPrivadaData = {
   membreteTel1: "+502 3340 7786",
   membreteTel2: "4004 5414",
   clienteNombre: "ABASTECIMIENTOS ABASA",
+  clienteNit: "",
+  clienteCelular: "",
+  clienteCorreo: "",
+  validez: "20 días calendario",
   concepto: "repuesto de bomba de alta presión",
   items: [
     {

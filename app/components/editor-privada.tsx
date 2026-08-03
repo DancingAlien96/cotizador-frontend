@@ -405,14 +405,35 @@ export function EditorPrivada({
                 Datos generales
               </legend>
               <div className="space-y-3">
-                <Field label="Fecha" value={data.fecha} onChange={(v) => set("fecha", v)} />
+                <div className="flex gap-2">
+                  <Field label="Fecha" value={data.fecha} onChange={(v) => set("fecha", v)} />
+                  <Field label="Validez" value={data.validez} onChange={(v) => set("validez", v)} />
+                </div>
                 <ClienteAutocomplete
                   label="Cliente (destinatario)"
                   value={data.clienteNombre}
                   onChange={(v) => set("clienteNombre", v)}
-                  onSelect={(c) => set("clienteNombre", c.nombre)}
-                  datosActuales={() => ({ nombre: data.clienteNombre })}
+                  onSelect={(c) =>
+                    setData((prev) => ({
+                      ...prev,
+                      clienteNombre: c.nombre,
+                      clienteNit: c.nit ?? prev.clienteNit,
+                      clienteCelular: c.telefono ?? prev.clienteCelular,
+                      clienteCorreo: c.correo ?? prev.clienteCorreo,
+                    }))
+                  }
+                  datosActuales={() => ({
+                    nombre: data.clienteNombre,
+                    nit: data.clienteNit,
+                    telefono: data.clienteCelular,
+                    correo: data.clienteCorreo,
+                  })}
                 />
+                <div className="flex gap-2">
+                  <Field label="NIT del cliente" value={data.clienteNit} onChange={(v) => set("clienteNit", v)} />
+                  <Field label="Celular del cliente" value={data.clienteCelular} onChange={(v) => set("clienteCelular", v)} />
+                </div>
+                <Field label="Correo del cliente" value={data.clienteCorreo} onChange={(v) => set("clienteCorreo", v)} />
                 <label className="block">
                   <span className="mb-1 block text-sm text-zinc-600 dark:text-zinc-400">
                     Concepto de la oferta
