@@ -115,6 +115,14 @@ export function EditorTienda({
       ],
     }));
   }
+  // Deshace los últimos n ítems (los agregados desde el buscador de inventario).
+  function cancelarProductos(n: number) {
+    if (n <= 0) return;
+    setData((prev) => ({
+      ...prev,
+      items: prev.items.slice(0, Math.max(0, prev.items.length - n)),
+    }));
+  }
   function removeItem(i: number) {
     setData((prev) => ({
       ...prev,
@@ -299,6 +307,7 @@ export function EditorTienda({
       {buscadorAbierto && (
         <ProductoBuscador
           onAgregar={addProducto}
+          onCancelar={cancelarProductos}
           onClose={() => setBuscadorAbierto(false)}
         />
       )}

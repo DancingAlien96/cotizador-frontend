@@ -9,9 +9,12 @@ import { formatQ } from "../lib/cotizacion-privada";
 // a la cotización (onAgregar); se puede agregar varios antes de cerrar.
 export function ProductoBuscador({
   onAgregar,
+  onCancelar,
   onClose,
 }: {
   onAgregar: (p: Producto) => void;
+  // Deshace los `n` productos agregados en esta sesión del buscador.
+  onCancelar: (n: number) => void;
   onClose: () => void;
 }) {
   const [q, setQ] = useState("");
@@ -41,6 +44,12 @@ export function ProductoBuscador({
   function agregar(p: Producto) {
     onAgregar(p);
     setAgregados((n) => n + 1);
+  }
+
+  // Deshace lo agregado en esta sesión y cierra.
+  function cancelar() {
+    if (agregados > 0) onCancelar(agregados);
+    onClose();
   }
 
   return (
@@ -119,12 +128,18 @@ export function ProductoBuscador({
           </ul>
         </div>
 
-        <div className="flex justify-end border-t border-zinc-200 p-3 dark:border-zinc-800">
+        <div className="flex items-center justify-between border-t border-zinc-200 p-3 dark:border-zinc-800">
+          <button
+            onClick={cancelar}
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
+            {agregados > 0 ? "Cancelar (deshacer)" : "Cancelar"}
+          </button>
           <button
             onClick={onClose}
             className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
           >
-            Listo
+            Listo{agregados > 0 ? ` (${agregados})` : ""}
           </button>
         </div>
       </div>
