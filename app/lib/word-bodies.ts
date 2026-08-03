@@ -140,7 +140,7 @@ export function wordBodyTienda(
   const subtotal = subtotalTienda(items);
   const total = totalTienda(items, data.otros);
   return `
-<p style="text-align:right;font-size:18pt;color:#27aae1"><b>COTIZACIÓN</b></p>
+<p style="text-align:right;font-size:18pt;color:#0098ff"><b>COTIZACIÓN</b></p>
 <table style="margin-left:auto;margin-bottom:8pt">
   <tr><td ${TD}><b>COTIZACIÓN No.</b></td><td ${TD}><b>${esc(numero)}</b></td></tr>
 </table>
@@ -162,11 +162,11 @@ ${cuadroDatosWord({
 
 <table style="width:100%">
   <tr>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#27aae1;color:#fff;text-align:left">DESCRIPCION</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#27aae1;color:#fff;width:2.6cm">Precio</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#27aae1;color:#fff;width:2cm">Cantidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#27aae1;color:#fff;width:2cm">Unidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#27aae1;color:#fff;width:2.6cm">TOTAL</th>
+    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;text-align:left">DESCRIPCION</th>
+    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2.6cm">Precio</th>
+    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2cm">Cantidad</th>
+    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2cm">Unidad</th>
+    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2.6cm">TOTAL</th>
   </tr>
   ${items
     .map(
@@ -183,14 +183,14 @@ ${cuadroDatosWord({
 
 <table style="width:100%;margin-top:6pt"><tr>
   <td style="vertical-align:top;width:60%">
-    <p style="background:#27aae1;color:#fff;padding:3pt"><b>TÉRMINOS Y CONDICIONES</b></p>
+    <p style="background:#0098ff;color:#fff;padding:3pt"><b>TÉRMINOS Y CONDICIONES</b></p>
     ${data.terminos.filter((t) => t.trim()).map((t) => `<p>${esc(t)}</p>`).join("")}
   </td>
   <td style="vertical-align:top">
     <table style="margin-left:auto">
       <tr><td style="text-align:right;padding:2pt">Subtotal</td><td style="text-align:right;padding:2pt">${formatQ(subtotal)}</td></tr>
       <tr><td style="text-align:right;padding:2pt">Otros</td><td style="text-align:right;padding:2pt">${formatQ(parseNum(data.otros))}</td></tr>
-      <tr><td style="text-align:right;padding:2pt"><b>TOTAL</b></td><td style="text-align:right;padding:2pt;background:#d7effa"><b>${formatQ(total)}</b></td></tr>
+      <tr><td style="text-align:right;padding:2pt"><b>TOTAL</b></td><td style="text-align:right;padding:2pt;background:#d5ecfd"><b>${formatQ(total)}</b></td></tr>
     </table>
   </td>
 </tr></table>
@@ -272,13 +272,13 @@ export function wordBodyCarta(data: CartaData): string {
 // ---------- Piscina (PROASA) ----------
 export function wordBodyPiscina(data: PropuestaPiscinaData): string {
   const sec = (n: number | string, t: string) =>
-    `<p style="color:#1c27d6;font-size:13pt;border-bottom:2px solid #1c27d6"><b>${n}. ${esc(t)}</b></p>`;
+    `<p style="color:#0027a5;font-size:13pt;border-bottom:2px solid #0027a5"><b>${n}. ${esc(t)}</b></p>`;
   return `
 <table style="width:100%"><tr>
   <td style="vertical-align:middle"><img src="/proasalogo.png" style="height:1.6cm" /></td>
   <td style="vertical-align:middle;text-align:right;color:#555">www.proasa.com.gt</td>
 </tr></table>
-<p style="color:#1c27d6"><b>PROPUESTA TÉCNICA Y ECONÓMICA</b></p>
+<p style="color:#0027a5"><b>PROPUESTA TÉCNICA Y ECONÓMICA</b></p>
 <p style="font-size:18pt"><b>${esc(data.titulo)}</b></p>
 <p style="color:#555">${esc(data.subtitulo)}</p>
 <p style="text-align:justify">${esc(data.descripcion)}</p>
@@ -300,9 +300,9 @@ ${sec(6, "PROPUESTA ECONÓMICA — OPCIONES DE INVERSIÓN")}
 <p style="text-align:justify">${esc(data.introEconomica)}</p>
 <table style="width:100%">
   <tr>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#1c27d6;color:#fff">Componente</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#1c27d6;color:#fff;width:3.5cm">OPCIÓN 1<br />${esc(data.nombreOp1)}</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#1c27d6;color:#fff;width:3.5cm">OPCIÓN 2<br />${esc(data.nombreOp2)}</th>
+    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff">Componente</th>
+    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:3.5cm">OPCIÓN 1<br />${esc(data.nombreOp1)}</th>
+    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:3.5cm">OPCIÓN 2<br />${esc(data.nombreOp2)}</th>
   </tr>
   ${data.componentes
     .map(
@@ -319,9 +319,9 @@ ${sec(6, "PROPUESTA ECONÓMICA — OPCIONES DE INVERSIÓN")}
   <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>IVA 12%</b></td>
     <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(ivaDe(data.subtotalOp1))}</b></td>
     <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(ivaDe(data.subtotalOp2))}</b></td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt;background:#e8eaff"><b>PRECIO TOTAL (IVA incluido)</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#e8eaff"><b>${formatQ(totalConIva(data.subtotalOp1))}</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#e8eaff"><b>${formatQ(totalConIva(data.subtotalOp2))}</b></td></tr>
+  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt;background:#d5ecfd"><b>PRECIO TOTAL (IVA incluido)</b></td>
+    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#d5ecfd"><b>${formatQ(totalConIva(data.subtotalOp1))}</b></td>
+    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#d5ecfd"><b>${formatQ(totalConIva(data.subtotalOp2))}</b></td></tr>
 </table>
 <p style="text-align:justify;color:#555">${nl2br(data.resumenEconomico)}</p>
 
@@ -331,8 +331,8 @@ ${sec(8, "ACEPTACIÓN Y CONDICIONES DE PAGO")}<p style="text-align:justify">${nl
 ${sec(9, "CRONOGRAMA GENERAL")}
 <table style="width:100%">
   <tr>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#1c27d6;color:#fff">Fase</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#1c27d6;color:#fff;width:4cm">Duración</th>
+    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff">Fase</th>
+    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:4cm">Duración</th>
   </tr>
   ${data.cronograma
     .map(
@@ -343,11 +343,11 @@ ${sec(9, "CRONOGRAMA GENERAL")}
 </table>
 <p style="color:#555">${nl2br(data.cronogramaNota)}</p>
 
-${data.planoTexto.trim() || data.planoDataUrl ? `<p style="color:#1c27d6;font-size:13pt;border-bottom:2px solid #1c27d6"><b>ANEXO A — PLANO DE LA PISCINA</b></p>` : ""}
+${data.planoTexto.trim() || data.planoDataUrl ? `<p style="color:#0027a5;font-size:13pt;border-bottom:2px solid #0027a5"><b>ANEXO A — PLANO DE LA PISCINA</b></p>` : ""}
 ${data.planoTexto.trim() ? `<p style="text-align:justify">${nl2br(data.planoTexto)}</p>` : ""}
 ${data.planoDataUrl ? `<p style="text-align:center"><img src="${data.planoDataUrl}" style="width:14cm" /></p>` : ""}
 
-<p style="text-align:justify;border-top:2px solid #1c27d6;padding-top:8pt">${esc(data.cierreTexto)}</p>
+<p style="text-align:justify;border-top:2px solid #0027a5;padding-top:8pt">${esc(data.cierreTexto)}</p>
 <p>Atentamente,</p>
 <p><b>PROYECTOS DEL AGUA PROASA S.A. — Diseño y Construcción de Piscinas</b><br />
 contacto@proasa.com.gt<br />

@@ -12,6 +12,23 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Paleta de marca PROMESA (azules). Se redefine la escala "teal" que usa toda
+   la interfaz para no tocar cada componente:
+   claro #67C4F9 · vivo #0098FF · oscuro #0027A5 (principal de botones). */
+@theme {
+  --color-teal-50: #ecf6fe;
+  --color-teal-100: #d5ecfd;
+  --color-teal-200: #a6d9fb;
+  --color-teal-300: #67c4f9;
+  --color-teal-400: #33aaf7;
+  --color-teal-500: #0098ff;
+  --color-teal-600: #0027a5;
+  --color-teal-700: #001c74;
+  --color-teal-800: #00185f;
+  --color-teal-900: #001248;
+  --color-teal-950: #000b2e;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -94,7 +111,7 @@ body {
   line-height: 1.35;
 }
 .tienda-bar {
-  background: #27aae1;
+  background: #0098ff;
   color: #ffffff;
   font-weight: 700;
   padding: 3px 8px;
@@ -104,9 +121,9 @@ body {
   border-collapse: collapse;
 }
 .tabla-tienda th {
-  background: #27aae1;
+  background: #0098ff;
   color: #ffffff;
-  border: 1px solid #9bced9;
+  border: 1px solid #67c4f9;
   padding: 5px 8px;
   text-align: left;
   font-size: 12px;
@@ -138,11 +155,11 @@ body {
   padding: 56px 64px 64px;
 }
 .propuesta h2.sec {
-  color: #1c27d6;
+  color: #0027a5;
   font-size: 16px;
   font-weight: 700;
   margin: 22px 0 8px;
-  border-bottom: 2px solid #1c27d6;
+  border-bottom: 2px solid #0027a5;
   padding-bottom: 3px;
 }
 .propuesta .pre {
@@ -162,7 +179,7 @@ body {
   vertical-align: top;
 }
 .tabla-piscina thead th {
-  background: #1c27d6;
+  background: #0027a5;
   color: #ffffff;
   text-align: center;
 }
@@ -174,7 +191,7 @@ body {
   font-weight: 700;
 }
 .tabla-piscina .destacado {
-  background: #e8eaff;
+  background: #d5ecfd;
 }
 
 /* Asegura que los colores del membrete/propuesta se impriman */

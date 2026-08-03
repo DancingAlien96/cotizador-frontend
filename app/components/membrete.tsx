@@ -1,9 +1,9 @@
 // Membrete PROMESA estilo corporativo: barra oscura con acento angular azul.
 // Formas en SVG (no clip-path) para que se rendericen bien también en el PDF.
 
-const AZUL = "#27AAE1";
-const CYAN = "#74D6F4";
-const AZUL_OSC = "#1B7CA6";
+const AZUL = "#0098FF";
+const CYAN = "#67C4F9";
+const AZUL_OSC = "#0027A5";
 const NEGRO = "#231F20";
 
 function IconMail() {

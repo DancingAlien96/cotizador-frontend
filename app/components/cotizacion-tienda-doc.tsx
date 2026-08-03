@@ -35,7 +35,7 @@ export function CotizacionTiendaDoc({
       <div className="cotizacion-body">
         {/* Encabezado: COTIZACIÓN + No. */}
         <div className="mb-3 text-right">
-          <h2 className="mb-1 text-2xl font-bold tracking-wide text-[#27aae1]">
+          <h2 className="mb-1 text-2xl font-bold tracking-wide text-[#0098ff]">
             COTIZACIÓN
           </h2>
           <table className="tabla-fechas ml-auto">
@@ -126,7 +126,7 @@ export function CotizacionTiendaDoc({
               </tr>
               <tr className="font-bold">
                 <td className="py-0.5 text-right">TOTAL</td>
-                <td className="bg-[#d7effa] py-0.5 text-right">
+                <td className="bg-[#d5ecfd] py-0.5 text-right">
                   {formatQ(total)}
                 </td>
               </tr>

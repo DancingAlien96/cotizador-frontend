@@ -5,7 +5,7 @@ import {
 } from "../lib/propuesta-piscina";
 import { formatQ } from "../lib/cotizacion-privada";
 
-const AZUL = "#1c27d6";
+const AZUL = "#0027a5";
 
 function Seccion({
   n,
