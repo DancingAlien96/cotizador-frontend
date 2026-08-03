@@ -30,6 +30,7 @@ import {
 import { ClienteAutocomplete } from "./cliente-autocomplete";
 import { AutocompleteTexto } from "./autocomplete-texto";
 import { VersionesControls } from "./versiones-controls";
+import { ProductoBuscador } from "./producto-buscador";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -53,6 +54,7 @@ export function EditorGuatecompras({
   const [nombre, setNombre] = useState("");
   const [autor, setAutor] = useState(userEmail);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [buscadorAbierto, setBuscadorAbierto] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
@@ -92,6 +94,15 @@ export function EditorGuatecompras({
     setData((prev) => ({
       ...prev,
       items: [...prev.items, { cantidad: "1", descripcion: "", precioUnidad: "" }],
+    }));
+  }
+  function addProducto(p: { nombre: string; precio: number }) {
+    setData((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        { cantidad: "1", descripcion: p.nombre, precioUnidad: String(p.precio) },
+      ],
     }));
   }
   function removeItem(i: number) {
@@ -290,6 +301,13 @@ export function EditorGuatecompras({
         />
       )}
 
+      {buscadorAbierto && (
+        <ProductoBuscador
+          onAgregar={addProducto}
+          onClose={() => setBuscadorAbierto(false)}
+        />
+      )}
+
       <div className="flex flex-1 flex-col lg:flex-row">
         {/* Formulario */}
         <aside spellCheck lang="es" className="no-print w-full overflow-y-auto border-b border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:h-[calc(100vh-57px)] lg:w-[26rem] lg:border-b-0 lg:border-r">
@@ -458,9 +476,14 @@ export function EditorGuatecompras({
                     </div>
                   </div>
                 ))}
-                <button onClick={addItem} className="w-full rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:border-teal-400 hover:text-teal-700 dark:border-zinc-700 dark:text-zinc-400">
-                  + Agregar ítem
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={addItem} className="flex-1 rounded-md border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600 hover:border-teal-400 hover:text-teal-700 dark:border-zinc-700 dark:text-zinc-400">
+                    + Agregar ítem
+                  </button>
+                  <button onClick={() => setBuscadorAbierto(true)} className="rounded-md border border-teal-600 px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950">
+                    Agregar desde inventario
+                  </button>
+                </div>
                 <div className="rounded-md bg-zinc-50 px-3 py-2 text-right text-sm font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
                   TOTAL: {formatQ(total)}
                 </div>

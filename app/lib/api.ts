@@ -276,6 +276,19 @@ export type Cliente = {
   updatedAt: string;
 };
 
+// Producto del inventario externo (SoluPOS), ya limpio por el backend.
+export type Producto = {
+  id: number;
+  nombre: string;
+  precio: number;
+  categoria: string;
+};
+
+export function apiProductos(search: string): Promise<Producto[]> {
+  const sp = new URLSearchParams({ search, limit: "25" });
+  return request<Producto[]>(`/api/productos?${sp.toString()}`);
+}
+
 export type CampoFrase = "descripcion" | "termino" | "observacion" | "concepto";
 
 export function apiFrases(campo: CampoFrase, q: string): Promise<string[]> {
