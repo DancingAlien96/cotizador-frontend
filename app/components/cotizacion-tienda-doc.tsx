@@ -33,19 +33,12 @@ export function CotizacionTiendaDoc({
       />
 
       <div className="cotizacion-body">
-        {/* Encabezado: COTIZACIÓN + No. */}
+        {/* Encabezado: COTIZACIÓN + No. (sin recuadro) */}
         <div className="mb-3 text-right">
           <h2 className="mb-1 text-2xl font-bold tracking-wide text-[#0098ff]">
             COTIZACIÓN
           </h2>
-          <table className="tabla-fechas ml-auto">
-            <tbody>
-              <tr>
-                <td className="font-bold">COTIZACIÓN No.</td>
-                <td className="font-bold">{numero}</td>
-              </tr>
-            </tbody>
-          </table>
+          <p className="font-bold">Cotización No. {numero}</p>
         </div>
 
         {/* Recuadro de datos (empresa + cliente) */}
@@ -134,10 +127,23 @@ export function CotizacionTiendaDoc({
           </table>
         </div>
 
-        <p className="mt-10 text-center text-zinc-600">
+        <p className="mt-8 text-center text-zinc-600">
           Si usted tiene alguna pregunta sobre esta cotización, por favor,
           póngase en contacto con nosotros
         </p>
+
+        {/* Firma y sello */}
+        <div className="mt-6 flex flex-col items-end">
+          <img
+            src="/selloyfirma.png"
+            alt="Firma y sello PROMESA"
+            className="w-56 max-w-full"
+          />
+          <div className="text-center leading-tight">
+            <p>César Eduardo Regalado Salguero</p>
+            <p>Propietario</p>
+          </div>
+        </div>
       </div>
 
       <MembreteFooter />

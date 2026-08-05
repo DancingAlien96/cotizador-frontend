@@ -52,7 +52,9 @@ function cuadroDatosWord(c: {
   clienteCelular: string;
   clienteCorreo: string;
 }): string {
-  const l = (et: string, v: string) => `<b>${et}:</b> ${esc(v)}<br />`;
+  // Campo vacío -> no se muestra la etiqueta.
+  const l = (et: string, v: string) =>
+    v && v.trim() ? `<b>${et}:</b> ${esc(v)}<br />` : "";
   return `
 <p style="font-size:10pt;margin-bottom:6pt">
   ${l("Nombre de la empresa", c.empresaNombre)}
@@ -97,8 +99,8 @@ ${cuadroDatosWord({
   clienteCorreo: data.clienteCorreo,
 })}
 
-<p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>
-<p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica para ${esc(data.concepto)}:</p>
+${data.clienteNombre.trim() ? `<p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>` : ""}
+<p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica${data.concepto.trim() ? ` para ${esc(data.concepto)}` : ""}:</p>
 
 <table style="width:100%">
   <tr>
@@ -141,9 +143,7 @@ export function wordBodyTienda(
   const total = totalTienda(items, data.otros);
   return `
 <p style="text-align:right;font-size:18pt;color:#0098ff"><b>COTIZACIÓN</b></p>
-<table style="margin-left:auto;margin-bottom:8pt">
-  <tr><td ${TD}><b>COTIZACIÓN No.</b></td><td ${TD}><b>${esc(numero)}</b></td></tr>
-</table>
+<p style="text-align:right;margin-bottom:8pt"><b>Cotización No. ${esc(numero)}</b></p>
 
 ${cuadroDatosWord({
   empresaNombre: data.empresaNombre,
@@ -196,6 +196,9 @@ ${cuadroDatosWord({
 </tr></table>
 
 <p style="text-align:center;color:#555;margin-top:18pt">Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros</p>
+
+<p style="text-align:right;margin-top:12pt">${FIRMA}</p>
+<p style="text-align:right">César Eduardo Regalado Salguero<br />Propietario</p>
 `;
 }
 

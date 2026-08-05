@@ -16,7 +16,9 @@ export type CuadroDatosProps = {
   clienteCorreo: string;
 };
 
+// Si el valor está vacío, la línea (etiqueta incluida) no se muestra.
 function Linea({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+  if (!valor.trim()) return null;
   return (
     <p className="leading-snug">
       <span className="font-semibold">{etiqueta}:</span> {valor}

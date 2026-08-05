@@ -36,8 +36,9 @@ export const tiendaDefaults: CotizacionTiendaData = {
   fecha: "19/6/26",
   validoHasta: "4/7/26",
   asesor: "Ing. Isabel Regalado",
-  cliente: "USAC / FMVZ",
-  nitCliente: "255117-9",
+  // Datos del cliente: vacíos (se llenan por cotización).
+  cliente: "",
+  nitCliente: "",
   membreteCorreo: "eregalado@aquaequipos.com",
   membreteTel1: "+502 3340 7786",
   membreteTel2: "4004 5414",
@@ -49,15 +50,8 @@ export const tiendaDefaults: CotizacionTiendaData = {
   validez: "20 días calendario",
   clienteCelular: "",
   clienteCorreo: "",
-  items: [
-    {
-      descripcion:
-        "Osmosis inversa de 600gpd - 5 etapas - Etapas de sedimentos, carbón activado, membrana de ósmosis inversa y pos-filtro + Filtro de resina mixta para agua desmineralizada + Lampara UV para desinfección",
-      precio: "11300",
-      cantidad: "1",
-      unidad: "",
-    },
-  ],
+  // Un ítem en blanco listo para llenar.
+  items: [{ descripcion: "", precio: "", cantidad: "1", unidad: "" }],
   otros: "0",
   terminos: ["Precio incluye Iva."],
 };

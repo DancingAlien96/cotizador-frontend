@@ -50,16 +50,18 @@ export function CotizacionPrivadaDoc({
           clienteCorreo={data.clienteCorreo}
         />
 
-        {/* Destinatario */}
-        <div className="mb-3">
-          <p>Sres.</p>
-          <p className="font-bold">{data.clienteNombre}</p>
-          <p>Pte.</p>
-        </div>
+        {/* Destinatario (solo si hay cliente) */}
+        {data.clienteNombre.trim() && (
+          <div className="mb-3">
+            <p>Sres.</p>
+            <p className="font-bold">{data.clienteNombre}</p>
+            <p>Pte.</p>
+          </div>
+        )}
 
         <p className="mb-4 text-justify indent-10">
-          En atención a su solicitud presento la siguiente oferta económica para{" "}
-          {data.concepto}:
+          En atención a su solicitud presento la siguiente oferta económica
+          {data.concepto.trim() ? ` para ${data.concepto}` : ""}:
         </p>
 
         {/* Tabla de ítems */}

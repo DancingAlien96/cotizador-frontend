@@ -49,25 +49,15 @@ export const cotizacionPrivadaDefaults: CotizacionPrivadaData = {
   membreteCorreo: "eregalado@aquaequipos.com",
   membreteTel1: "+502 3340 7786",
   membreteTel2: "4004 5414",
-  clienteNombre: "ABASTECIMIENTOS ABASA",
+  // Datos del cliente y de la oferta: vacíos (se llenan por cotización).
+  clienteNombre: "",
   clienteNit: "",
   clienteCelular: "",
   clienteCorreo: "",
   validez: "20 días calendario",
-  concepto: "repuesto de bomba de alta presión",
-  items: [
-    {
-      cantidad: "1",
-      descripcion: "Kit de etapa VR1512-00/ 15KW/20HP 12 ETAPAS",
-      precioUnidad: "26747",
-    },
-  ],
-  observaciones: [
-    "Tiempo de entrega: 2 meses luego de recibida la OC (producto de importación)",
-    "Precio no incluye instalación",
-    "Precio incluye IVA",
-    "Forma de pago: 50% de anticipo y 50% al recibir",
-  ],
+  concepto: "",
+  items: [{ cantidad: "1", descripcion: "", precioUnidad: "" }],
+  observaciones: [""],
 };
 
 // Teléfono fijo de la empresa (segundo número que acompaña al del asesor).
