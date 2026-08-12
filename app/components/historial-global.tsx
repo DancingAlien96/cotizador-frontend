@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { fetchHistorial, setEstado, setSeguimiento } from "../actions/historial";
+import {
+  eliminarCotizacion,
+  fetchHistorial,
+  setEstado,
+  setSeguimiento,
+} from "../actions/historial";
 import { formatQ } from "../lib/cotizacion-privada";
 import type { Estado, HistorialItem } from "../lib/api";
 import { ESTADO_INFO, ESTADO_ORDEN } from "../lib/estados";
@@ -94,6 +99,27 @@ export function HistorialGlobal({
         await setSeguimiento({ tipo: it.tipo, id: it.id, fecha });
       } catch {
         setItems(antes);
+      }
+    });
+  }
+
+  function eliminar(it: HistorialItem) {
+    const nombre = it.nombre || it.cliente || "esta cotización";
+    if (
+      !confirm(
+        `¿Eliminar "${nombre}"? Se borra de forma permanente, con todas sus versiones. Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    const antes = items;
+    setItems((prev) => prev.filter((x) => x.id !== it.id));
+    setTotal((t) => Math.max(0, t - 1));
+    startEstadoTransition(async () => {
+      try {
+        await eliminarCotizacion(it.tipo, it.id);
+      } catch {
+        setItems(antes);
+        setTotal(antes.length);
       }
     });
   }
@@ -239,12 +265,23 @@ export function HistorialGlobal({
                   </td>
                   <td className="px-4 py-2.5 text-zinc-500">{it.fecha || "—"}</td>
                   <td className="px-4 py-2.5 text-right">
-                    <Link
-                      href={rutaAbrir(it)}
-                      className="font-medium text-teal-700 hover:underline"
-                    >
-                      Abrir →
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={rutaAbrir(it)}
+                        className="font-medium text-teal-700 hover:underline"
+                      >
+                        Abrir →
+                      </Link>
+                      <button
+                        onClick={() => eliminar(it)}
+                        title="Eliminar cotización"
+                        className="rounded p-1 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

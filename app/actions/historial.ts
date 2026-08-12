@@ -3,6 +3,7 @@
 import { getSession } from "../lib/session";
 import {
   apiAlertas,
+  apiDelete,
   apiHistorial,
   apiSetEstado,
   apiSetSeguimiento,
@@ -17,6 +18,14 @@ export async function fetchAlertas(): Promise<Alertas> {
   const session = await getSession();
   if (!session) throw new Error("No autorizado.");
   return apiAlertas();
+}
+
+// Elimina una cotización (y sus versiones) desde la vista de Seguimiento.
+// `tipo` llega en mayúsculas (TIENDA, EMPRESAS…); la API lo espera en minúsculas.
+export async function eliminarCotizacion(tipo: string, id: string): Promise<void> {
+  const session = await getSession();
+  if (!session) throw new Error("No autorizado.");
+  await apiDelete(tipo.toLowerCase(), id);
 }
 
 export async function setSeguimiento(params: {

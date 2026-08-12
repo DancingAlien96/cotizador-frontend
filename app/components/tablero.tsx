@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { fetchTablero, setEstado } from "../actions/historial";
+import { eliminarCotizacion, fetchTablero, setEstado } from "../actions/historial";
 import { formatQ } from "../lib/cotizacion-privada";
 import type { ColumnaTablero, Estado, HistorialItem } from "../lib/api";
 import { ESTADO_INFO, ESTADO_ORDEN } from "../lib/estados";
@@ -60,6 +60,37 @@ export function Tablero({ tipo, q }: { tipo: string; q: string }) {
           estado: destino,
           motivoRechazo: motivo,
         });
+      } catch {
+        setColumnas(antes);
+      }
+    });
+  }
+
+  function eliminar(item: HistorialItem) {
+    const nombre = item.nombre || item.cliente || "esta cotización";
+    if (
+      !confirm(
+        `¿Eliminar "${nombre}"? Se borra de forma permanente, con todas sus versiones. Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    const antes = columnas;
+    setColumnas(
+      (prev) =>
+        prev?.map((c) =>
+          c.estado === item.estado
+            ? {
+                ...c,
+                items: c.items.filter((x) => x.id !== item.id),
+                total: c.total - 1,
+                monto: c.monto - (item.total ?? 0),
+              }
+            : c,
+        ) ?? null,
+    );
+    startTransition(async () => {
+      try {
+        await eliminarCotizacion(item.tipo, item.id);
       } catch {
         setColumnas(antes);
       }
@@ -138,6 +169,7 @@ export function Tablero({ tipo, q }: { tipo: string; q: string }) {
                     arrastrando={arrastrando === it.id}
                     onDragStart={() => setArrastrando(it.id)}
                     onDragEnd={() => setArrastrando(null)}
+                    onEliminar={() => eliminar(it)}
                   />
                 ))}
                 {col.items.length === 0 && (
@@ -175,11 +207,13 @@ function TarjetaCotizacion({
   arrastrando,
   onDragStart,
   onDragEnd,
+  onEliminar,
 }: {
   item: HistorialItem;
   arrastrando: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
+  onEliminar: () => void;
 }) {
   const info = tipoInfo(item.tipo);
   return (
@@ -241,12 +275,23 @@ function TarjetaCotizacion({
 
       <div className="mt-2 flex items-center justify-between border-t border-zinc-100 pt-1.5 dark:border-zinc-700">
         <span className="truncate text-[10px] text-zinc-400">{item.autor || "—"}</span>
-        <Link
-          href={rutaAbrir(item)}
-          className="text-[11px] font-medium text-teal-700 hover:underline dark:text-teal-400"
-        >
-          Abrir →
-        </Link>
+        <span className="flex shrink-0 items-center gap-2">
+          <Link
+            href={rutaAbrir(item)}
+            className="text-[11px] font-medium text-teal-700 hover:underline dark:text-teal-400"
+          >
+            Abrir →
+          </Link>
+          <button
+            onClick={onEliminar}
+            title="Eliminar cotización"
+            className="rounded p-0.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6" />
+            </svg>
+          </button>
+        </span>
       </div>
     </div>
   );
