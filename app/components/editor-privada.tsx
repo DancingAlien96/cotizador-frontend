@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
+  cotizacionPrivadaDefaults,
   cotizacionPrivadaDefaultsHoy,
   totalItem,
   totalGeneral,
@@ -71,7 +72,7 @@ export function EditorPrivada({
   });
   function restaurarBorrador() {
     if (!draft) return;
-    setData(draft.snapshot.data);
+    setData({ ...cotizacionPrivadaDefaults, ...draft.snapshot.data });
     setCurrentId(draft.snapshot.currentId);
     setNumero(draft.snapshot.numero);
     setNombre(draft.snapshot.nombre ?? "");
@@ -153,7 +154,9 @@ export function EditorPrivada({
     clearDraft();
   }
   function handleCargar(item: SavedCotizacionPrivada) {
-    setData(item.data);
+    // Se combina con los defaults para que las cotizaciones viejas (sin los
+    // campos nuevos) tengan todos los campos definidos.
+    setData({ ...cotizacionPrivadaDefaults, ...item.data });
     setCurrentId(item.id);
     setVersion(item.version);
     setViendoVersion(null);

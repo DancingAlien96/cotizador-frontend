@@ -51,7 +51,7 @@ export function CotizacionPrivadaDoc({
         />
 
         {/* Destinatario (solo si hay cliente) */}
-        {data.clienteNombre.trim() && (
+        {data.clienteNombre?.trim() && (
           <div className="mb-3">
             <p>Sres.</p>
             <p className="font-bold">{data.clienteNombre}</p>
@@ -61,7 +61,7 @@ export function CotizacionPrivadaDoc({
 
         <p className="mb-4 text-justify indent-10">
           En atención a su solicitud presento la siguiente oferta económica
-          {data.concepto.trim() ? ` para ${data.concepto}` : ""}:
+          {data.concepto?.trim() ? ` para ${data.concepto}` : ""}:
         </p>
 
         {/* Tabla de ítems */}

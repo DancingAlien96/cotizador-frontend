@@ -99,8 +99,8 @@ ${cuadroDatosWord({
   clienteCorreo: data.clienteCorreo,
 })}
 
-${data.clienteNombre.trim() ? `<p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>` : ""}
-<p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica${data.concepto.trim() ? ` para ${esc(data.concepto)}` : ""}:</p>
+${data.clienteNombre?.trim() ? `<p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>` : ""}
+<p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica${data.concepto?.trim() ? ` para ${esc(data.concepto)}` : ""}:</p>
 
 <table style="width:100%">
   <tr>

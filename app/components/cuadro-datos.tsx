@@ -16,12 +16,14 @@ export type CuadroDatosProps = {
   clienteCorreo: string;
 };
 
-// Si el valor está vacío, la línea (etiqueta incluida) no se muestra.
-function Linea({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  if (!valor.trim()) return null;
+// Si el valor está vacío (o no existe, en cotizaciones viejas), la línea
+// —etiqueta incluida— no se muestra.
+function Linea({ etiqueta, valor }: { etiqueta: string; valor?: string }) {
+  const v = (valor ?? "").trim();
+  if (!v) return null;
   return (
     <p className="leading-snug">
-      <span className="font-semibold">{etiqueta}:</span> {valor}
+      <span className="font-semibold">{etiqueta}:</span> {v}
     </p>
   );
 }

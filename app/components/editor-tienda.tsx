@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
+  tiendaDefaults,
   tiendaDefaultsHoy,
   totalItemTienda,
   totalTienda,
@@ -68,7 +69,7 @@ export function EditorTienda({
   });
   function restaurarBorrador() {
     if (!draft) return;
-    setData(draft.snapshot.data);
+    setData({ ...tiendaDefaults, ...draft.snapshot.data });
     setCurrentId(draft.snapshot.currentId);
     setNumero(draft.snapshot.numero ?? proximoNumero);
     setNombre(draft.snapshot.nombre ?? "");
@@ -157,7 +158,9 @@ export function EditorTienda({
     clearDraft();
   }
   function handleCargar(item: SavedTienda) {
-    setData(item.data);
+    // Combina con los defaults para que las cotizaciones viejas (sin campos
+    // nuevos) tengan todos los campos definidos.
+    setData({ ...tiendaDefaults, ...item.data });
     setCurrentId(item.id);
     setVersion(item.version);
     setViendoVersion(null);
