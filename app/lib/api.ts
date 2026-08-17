@@ -327,3 +327,17 @@ export function apiDelete(tipo: string, id: string): Promise<void> {
 export function ts(iso: string): number {
   return new Date(iso).getTime();
 }
+
+// Asistente de ayuda (IA). Un mensaje de la conversación.
+export type MensajeChat = { role: "user" | "assistant"; content: string };
+
+export function apiAsistenteEstado(): Promise<{ configurado: boolean }> {
+  return request<{ configurado: boolean }>("/api/asistente/estado");
+}
+
+export function apiAsistente(mensajes: MensajeChat[]): Promise<{ reply: string }> {
+  return request<{ reply: string }>("/api/asistente", {
+    method: "POST",
+    body: JSON.stringify({ mensajes }),
+  });
+}

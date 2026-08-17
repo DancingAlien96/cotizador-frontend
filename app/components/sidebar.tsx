@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { logout } from "../actions/auth";
+import { AsistenteChat } from "./asistente-chat";
 
 // Rutas con vista previa del documento: ahí el sidebar se colapsa a iconos
 // para no quitarle ancho a la hoja.
@@ -112,6 +113,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         {children}
       </div>
+
+      {/* Chat de ayuda flotante, disponible en todo el sistema */}
+      <AsistenteChat />
     </div>
   );
 }
