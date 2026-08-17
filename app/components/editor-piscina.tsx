@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   piscinaDefaultsHoy,
@@ -22,6 +23,8 @@ import { ClienteAutocomplete } from "./cliente-autocomplete";
 import { VersionesControls } from "./versiones-controls";
 import { PreviewScaler } from "./preview-scaler";
 import { SaveDialog } from "./save-dialog";
+import { useCambios } from "../lib/use-cambios";
+import { ConfirmarCambios } from "./confirmar-cambios";
 
 const input =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -46,6 +49,26 @@ export function EditorPiscina({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  // Cambios sin guardar: aviso al salir/cambiar de versión.
+  const router = useRouter();
+  const { dirty, marcarLimpio } = useCambios(data);
+  const pendiente = useRef<null | (() => void)>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  function intentar(accion: () => void) {
+    if (dirty) {
+      pendiente.current = accion;
+      setConfirmOpen(true);
+    } else {
+      accion();
+    }
+  }
+  function correrPendiente() {
+    const a = pendiente.current;
+    pendiente.current = null;
+    setConfirmOpen(false);
+    a?.();
+  }
 
   const { draft, canRestore, clear: clearDraft } = useDraft("piscina", {
     data,
@@ -114,7 +137,9 @@ export function EditorPiscina({
   }
 
   function handleNueva() {
-    setData(piscinaDefaultsHoy());
+    const d = piscinaDefaultsHoy();
+    setData(d);
+    marcarLimpio(d);
     setCurrentId(null);
     setVersion(1);
     setViendoVersion(null);
@@ -123,6 +148,7 @@ export function EditorPiscina({
     clearDraft();
   }
   function handleCargar(item: SavedPiscina) {
+    marcarLimpio(item.data);
     setData(item.data);
     setCurrentId(item.id);
     setVersion(item.version);
@@ -153,6 +179,12 @@ export function EditorPiscina({
       setViendoVersion(null);
       clearDraft();
       setSaveOpen(false);
+      marcarLimpio(data);
+      if (pendiente.current) {
+        const a = pendiente.current;
+        pendiente.current = null;
+        a();
+      }
     });
   }
   function handleEliminar(id: string) {
@@ -214,7 +246,16 @@ export function EditorPiscina({
     <div className="flex min-h-screen flex-col bg-zinc-100 dark:bg-zinc-950">
       <header className="no-print sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex items-center gap-3">
-          <Link href="/" className="rounded-md px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800">
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (dirty) {
+                e.preventDefault();
+                intentar(() => router.push("/"));
+              }
+            }}
+            className="rounded-md px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          >
             ← Inicio
           </Link>
           <h1 className="font-semibold text-zinc-800 dark:text-zinc-100">
@@ -246,10 +287,12 @@ export function EditorPiscina({
             &quot;Guardar como nueva versión&quot;.
           </span>
           <button
-            onClick={() => {
-              const item = saved.find((s) => s.id === currentId);
-              if (item) handleCargar(item);
-            }}
+            onClick={() =>
+              intentar(() => {
+                const item = saved.find((s) => s.id === currentId);
+                if (item) handleCargar(item);
+              })
+            }
             className="shrink-0 font-medium text-amber-700 hover:underline dark:text-amber-300"
           >
             Volver a la actual
@@ -263,7 +306,27 @@ export function EditorPiscina({
           initialAutor={autor || userEmail}
           saving={isPending}
           onConfirm={doGuardar}
-          onCancel={() => setSaveOpen(false)}
+          onCancel={() => {
+            setSaveOpen(false);
+            pendiente.current = null;
+          }}
+        />
+      )}
+
+      {confirmOpen && (
+        <ConfirmarCambios
+          guardando={isPending}
+          onGuardar={() => {
+            setConfirmOpen(false);
+            if (currentId)
+              doGuardar(nombre || `Piscina — ${data.cliente}`.trim(), autor || userEmail);
+            else setSaveOpen(true);
+          }}
+          onDescartar={correrPendiente}
+          onCancelar={() => {
+            pendiente.current = null;
+            setConfirmOpen(false);
+          }}
         />
       )}
 
@@ -282,7 +345,7 @@ export function EditorPiscina({
                 <button onClick={() => setSaveOpen(true)} disabled={isPending} className="flex-1 rounded-md bg-teal-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60">
                   {currentId ? "Guardar cambios" : "Guardar"}
                 </button>
-                <button onClick={handleNueva} disabled={isPending} className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                <button onClick={() => intentar(handleNueva)} disabled={isPending} className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">
                   Nueva
                 </button>
               </div>
@@ -290,7 +353,7 @@ export function EditorPiscina({
                 <ul className="mt-3 max-h-40 space-y-1 overflow-y-auto">
                   {saved.map((item) => (
                     <li key={item.id} className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${item.id === currentId ? "bg-teal-50 dark:bg-teal-950/40" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"}`}>
-                      <button onClick={() => handleCargar(item)} className="min-w-0 flex-1 text-left">
+                      <button onClick={() => intentar(() => handleCargar(item))} className="min-w-0 flex-1 text-left">
                         <span className="block truncate text-zinc-800 dark:text-zinc-100">{item.data.cliente || "—"}</span>
                         <span className="block truncate text-[11px] text-zinc-400">{item.data.titulo}</span>
                       </button>
@@ -324,10 +387,13 @@ export function EditorPiscina({
                   ),
                 );
               }}
-              onAbrirSnapshot={(snap, meta) => {
-                setData(snap as PropuestaPiscinaData);
-                setViendoVersion(meta.version);
-              }}
+              onAbrirSnapshot={(snap, meta) =>
+                intentar(() => {
+                  marcarLimpio(snap);
+                  setData(snap as PropuestaPiscinaData);
+                  setViendoVersion(meta.version);
+                })
+              }
               formatTotal={formatQ}
               disabled={isPending}
             />

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   cotizacionPrivadaDefaults,
@@ -25,6 +26,8 @@ import { ClienteAutocomplete } from "./cliente-autocomplete";
 import { AutocompleteTexto } from "./autocomplete-texto";
 import { VersionesControls } from "./versiones-controls";
 import { ProductoBuscador } from "./producto-buscador";
+import { useCambios } from "../lib/use-cambios";
+import { ConfirmarCambios } from "./confirmar-cambios";
 
 const inputClass =
   "w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm text-zinc-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100";
@@ -36,6 +39,7 @@ export function EditorPrivada({
   initialSelectedId,
   userEmail = "",
   headerExtra,
+  onDirtyChange,
 }: {
   initialCotizaciones: SavedCotizacionPrivada[];
   siguienteNumero: string;
@@ -43,6 +47,7 @@ export function EditorPrivada({
   initialSelectedId?: string;
   userEmail?: string;
   headerExtra?: React.ReactNode;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const [data, setData] = useState<CotizacionPrivadaData>(
     cotizacionPrivadaDefaultsHoy,
@@ -62,6 +67,29 @@ export function EditorPrivada({
   const [isPending, startTransition] = useTransition();
   const [pdfLoading, setPdfLoading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
+
+  // Cambios sin guardar: aviso al salir/cambiar de versión.
+  const router = useRouter();
+  const { dirty, marcarLimpio } = useCambios(data);
+  const pendiente = useRef<null | (() => void)>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+  function intentar(accion: () => void) {
+    if (dirty) {
+      pendiente.current = accion;
+      setConfirmOpen(true);
+    } else {
+      accion();
+    }
+  }
+  function correrPendiente() {
+    const a = pendiente.current;
+    pendiente.current = null;
+    setConfirmOpen(false);
+    a?.();
+  }
 
   const { draft, canRestore, clear: clearDraft } = useDraft("empresas", {
     data,
@@ -144,7 +172,9 @@ export function EditorPrivada({
 
   // --- Cotizaciones guardadas ---
   function handleNueva() {
-    setData(cotizacionPrivadaDefaultsHoy());
+    const d = cotizacionPrivadaDefaultsHoy();
+    setData(d);
+    marcarLimpio(d);
     setCurrentId(null);
     setVersion(1);
     setViendoVersion(null);
@@ -156,7 +186,9 @@ export function EditorPrivada({
   function handleCargar(item: SavedCotizacionPrivada) {
     // Se combina con los defaults para que las cotizaciones viejas (sin los
     // campos nuevos) tengan todos los campos definidos.
-    setData({ ...cotizacionPrivadaDefaults, ...item.data });
+    const d = { ...cotizacionPrivadaDefaults, ...item.data };
+    marcarLimpio(d);
+    setData(d);
     setCurrentId(item.id);
     setVersion(item.version);
     setViendoVersion(null);
@@ -191,6 +223,12 @@ export function EditorPrivada({
       onSiguienteNumero?.(res.siguienteNumero);
       clearDraft();
       setSaveOpen(false);
+      marcarLimpio(data);
+      if (pendiente.current) {
+        const a = pendiente.current;
+        pendiente.current = null;
+        a();
+      }
     });
   }
   function handleEliminar(id: string) {
@@ -247,6 +285,12 @@ export function EditorPrivada({
         <div className="flex items-center gap-3">
           <Link
             href="/"
+            onClick={(e) => {
+              if (dirty) {
+                e.preventDefault();
+                intentar(() => router.push("/"));
+              }
+            }}
             className="rounded-md px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             ← Inicio
@@ -292,10 +336,12 @@ export function EditorPrivada({
             &quot;Guardar como nueva versión&quot;.
           </span>
           <button
-            onClick={() => {
-              const item = saved.find((s) => s.id === currentId);
-              if (item) handleCargar(item);
-            }}
+            onClick={() =>
+              intentar(() => {
+                const item = saved.find((s) => s.id === currentId);
+                if (item) handleCargar(item);
+              })
+            }
             className="shrink-0 font-medium text-amber-700 hover:underline dark:text-amber-300"
           >
             Volver a la actual
@@ -309,7 +355,30 @@ export function EditorPrivada({
           initialAutor={autor || userEmail}
           saving={isPending}
           onConfirm={doGuardar}
-          onCancel={() => setSaveOpen(false)}
+          onCancel={() => {
+            setSaveOpen(false);
+            pendiente.current = null;
+          }}
+        />
+      )}
+
+      {confirmOpen && (
+        <ConfirmarCambios
+          guardando={isPending}
+          onGuardar={() => {
+            setConfirmOpen(false);
+            if (currentId)
+              doGuardar(
+                nombre || `Empresas — ${data.clienteNombre}`.trim(),
+                autor || userEmail,
+              );
+            else setSaveOpen(true);
+          }}
+          onDescartar={correrPendiente}
+          onCancelar={() => {
+            pendiente.current = null;
+            setConfirmOpen(false);
+          }}
         />
       )}
 
@@ -345,7 +414,7 @@ export function EditorPrivada({
                   {currentId ? "Guardar cambios" : "Guardar"}
                 </button>
                 <button
-                  onClick={handleNueva}
+                  onClick={() => intentar(handleNueva)}
                   disabled={isPending}
                   className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
@@ -365,7 +434,7 @@ export function EditorPrivada({
                       }`}
                     >
                       <button
-                        onClick={() => handleCargar(item)}
+                        onClick={() => intentar(() => handleCargar(item))}
                         className="min-w-0 flex-1 text-left"
                       >
                         <span className="block truncate text-zinc-800 dark:text-zinc-100">
@@ -420,10 +489,13 @@ export function EditorPrivada({
                   ),
                 );
               }}
-              onAbrirSnapshot={(snap, meta) => {
-                setData(snap as CotizacionPrivadaData);
-                setViendoVersion(meta.version);
-              }}
+              onAbrirSnapshot={(snap, meta) =>
+                intentar(() => {
+                  marcarLimpio(snap);
+                  setData(snap as CotizacionPrivadaData);
+                  setViendoVersion(meta.version);
+                })
+              }
               formatTotal={formatQ}
               disabled={isPending}
             />

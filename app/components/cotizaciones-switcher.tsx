@@ -27,13 +27,29 @@ export function CotizacionesSwitcher({
   // Tienda y Empresas comparten el correlativo: se mantiene aquí para que siga
   // actualizado al cambiar de formato sin recargar.
   const [sigNumero, setSigNumero] = useState(siguienteNumero);
+  // El editor activo avisa si tiene cambios sin guardar, para prevenir que
+  // se pierdan al cambiar de formato.
+  const [dirty, setDirty] = useState(false);
+
+  function cambiarFormato(f: Formato) {
+    if (f === formato) return;
+    if (
+      dirty &&
+      !confirm(
+        "Tienes cambios sin guardar en la cotización actual. Si cambias de formato se perderán. ¿Continuar?",
+      )
+    )
+      return;
+    setDirty(false);
+    setFormato(f);
+  }
 
   const selector = (
     <div className="flex rounded-lg border border-zinc-300 p-0.5 text-sm dark:border-zinc-700">
       {(["tienda", "empresas"] as const).map((f) => (
         <button
           key={f}
-          onClick={() => setFormato(f)}
+          onClick={() => cambiarFormato(f)}
           className={`rounded-md px-3 py-1 capitalize transition-colors ${
             formato === f
               ? "bg-teal-600 font-medium text-white"
@@ -58,6 +74,7 @@ export function CotizacionesSwitcher({
       initialSelectedId={selectedId("tienda")}
       userEmail={userEmail}
       headerExtra={selector}
+      onDirtyChange={setDirty}
     />
   ) : (
     <EditorPrivada
@@ -67,6 +84,7 @@ export function CotizacionesSwitcher({
       initialSelectedId={selectedId("empresas")}
       userEmail={userEmail}
       headerExtra={selector}
+      onDirtyChange={setDirty}
     />
   );
 }
