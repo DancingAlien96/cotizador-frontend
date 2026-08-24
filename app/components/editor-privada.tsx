@@ -253,7 +253,7 @@ export function EditorPrivada({
       await descargarWord({
         filename: toFilename(`Cotizacion ${numero}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
-        bodyHtml: wordBodyEmpresas(data, numero),
+        children: await wordBodyEmpresas(data, numero),
       });
     } catch (err) {
       console.error(err);

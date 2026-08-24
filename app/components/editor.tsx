@@ -108,7 +108,7 @@ export function Editor({
       await descargarWord({
         filename: toFilename(nombre.trim() || defaultNombre(data)).replace(/\.pdf$/, ".docx"),
         root: cartaRef.current,
-        bodyHtml: wordBodyCarta(data),
+        children: await wordBodyCarta(data),
       });
     } catch (err) {
       console.error(err);

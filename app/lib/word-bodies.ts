@@ -1,6 +1,8 @@
-// Cuerpos de documento en HTML compatible con Word (texto y tablas editables).
-// Se usan tablas para el diseño porque Word no soporta flexbox.
+// Cuerpos de documento como elementos Word nativos (párrafos y tablas `docx`).
+// Antes se generaba HTML que Word reinterpretaba; ahora se construye OOXML real
+// para que los formatos (anchos, sombreado, bordes) queden bien en la hoja.
 
+import type { Paragraph, Table } from "docx";
 import {
   formatQ,
   parseNum,
@@ -17,347 +19,452 @@ import {
 } from "./cotizacion-tienda";
 import { quetzalesEnLetras } from "./numero-a-letras";
 import type { CartaData } from "./carta";
+import { ivaDe, totalConIva, type PropuestaPiscinaData } from "./propuesta-piscina";
 import {
-  ivaDe,
-  totalConIva,
-  type PropuestaPiscinaData,
-} from "./propuesta-piscina";
+  bloqueDatos,
+  cm,
+  imagenCm,
+  par,
+  parLineas,
+  seccionTitulo,
+  t,
+  tabla,
+  vinieta,
+  type Celda,
+} from "./word-kit";
 
-function esc(s: string): string {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-function nl2br(s: string): string {
-  return esc(s).replace(/\n/g, "<br />");
-}
+type Elem = Paragraph | Table;
 
-const TD = 'style="border:1px solid #000;padding:5pt;vertical-align:top"';
-const TH = `style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center"`;
-const FIRMA = '<img src="/selloyfirma.png" style="width:5.5cm" />';
+const AZUL = "0098FF";
+const AZUL_OSC = "0027A5";
+const AZUL_CLARO = "D5ECFD";
+const GRIS = "C9C9C9";
+const FIRMA = "/selloyfirma.png";
 
-// Datos de empresa + cliente para Word, como texto (sin caja ni bordes).
-function cuadroDatosWord(c: {
-  empresaNombre: string;
-  empresaNit: string;
-  empresaDireccion: string;
-  asesor: string;
-  empresaCelular: string;
-  empresaCorreo: string;
-  fecha: string;
-  validez: string;
-  clienteNombre: string;
-  clienteNit: string;
-  clienteCelular: string;
-  clienteCorreo: string;
-}): string {
-  // Campo vacío -> no se muestra la etiqueta.
-  const l = (et: string, v: string) =>
-    v && v.trim() ? `<b>${et}:</b> ${esc(v)}<br />` : "";
-  return `
-<p style="font-size:10pt;margin-bottom:6pt">
-  ${l("Nombre de la empresa", c.empresaNombre)}
-  ${l("Nit", c.empresaNit)}
-  ${l("Dirección", c.empresaDireccion)}
-  ${l("Asesor de venta", c.asesor)}
-  ${l("Celular", c.empresaCelular)}
-  ${l("Correo", c.empresaCorreo)}
-  ${l("Fecha", c.fecha)}
-  ${l("Validez", c.validez)}
-</p>
-<p style="font-size:10pt;margin-bottom:8pt">
-  ${l("Cliente", c.clienteNombre)}
-  ${l("Nit", c.clienteNit)}
-  ${l("Celular", c.clienteCelular)}
-  ${l("Correo", c.clienteCorreo)}
-</p>`;
+// Fila de encabezado de tabla (texto centrado y en negrita, con relleno).
+function th(text: string, fill: string, color = "FFFFFF", align: Celda["align"] = "center"): Celda {
+  return { text, bold: true, fill, color, align };
 }
 
 // ---------- Empresas ----------
-export function wordBodyEmpresas(
+export async function wordBodyEmpresas(
   data: CotizacionPrivadaData,
   numero: string,
-): string {
+): Promise<Elem[]> {
   const items = data.items.filter((i) => i.descripcion.trim() || i.cantidad.trim());
   const total = totalGeneral(items);
-  return `
-<p style="text-align:right"><b>Cotización No. ${esc(numero)}</b></p>
+  const out: Elem[] = [];
 
-${cuadroDatosWord({
-  empresaNombre: data.empresaNombre,
-  empresaNit: data.empresaNit,
-  empresaDireccion: data.empresaDireccion,
-  asesor: data.asesorNombre,
-  empresaCelular: data.asesorTelefono,
-  empresaCorreo: data.asesorCorreo,
-  fecha: data.fecha,
-  validez: data.validez,
-  clienteNombre: data.clienteNombre,
-  clienteNit: data.clienteNit,
-  clienteCelular: data.clienteCelular,
-  clienteCorreo: data.clienteCorreo,
-})}
+  out.push(par([t(`Cotización No. ${numero}`, { bold: true })], { align: "right" }));
 
-${data.clienteNombre?.trim() ? `<p>Sres.<br /><b>${esc(data.clienteNombre)}</b><br />Pte.</p>` : ""}
-<p style="text-align:justify;text-indent:1cm">En atención a su solicitud presento la siguiente oferta económica${data.concepto?.trim() ? ` para ${esc(data.concepto)}` : ""}:</p>
+  out.push(
+    bloqueDatos([
+      ["Nombre de la empresa", data.empresaNombre],
+      ["Nit", data.empresaNit],
+      ["Dirección", data.empresaDireccion],
+      ["Asesor de venta", data.asesorNombre],
+      ["Celular", data.asesorTelefono],
+      ["Correo", data.asesorCorreo],
+      ["Fecha", data.fecha],
+      ["Validez", data.validez],
+    ]),
+  );
+  out.push(
+    bloqueDatos([
+      ["Cliente", data.clienteNombre],
+      ["Nit", data.clienteNit],
+      ["Celular", data.clienteCelular],
+      ["Correo", data.clienteCorreo],
+    ]),
+  );
 
-<table style="width:100%">
-  <tr>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:2cm">Cantidad</th>
-    <th ${TH}>Descripción</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:3cm">Precio Unidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:3cm">Total</th>
-  </tr>
-  ${items
-    .map(
-      (it) => `<tr>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:center">${esc(it.cantidad)}</td>
-    <td ${TD}>${esc(it.descripcion)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(parseNum(it.precioUnidad))}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(totalItem(it))}</td>
-  </tr>`,
-    )
-    .join("")}
-</table>
+  if (data.clienteNombre?.trim()) {
+    out.push(
+      par([
+        t("Sres."),
+        t(data.clienteNombre, { bold: true, break: 1 }),
+        t("Pte.", { break: 1 }),
+      ]),
+    );
+  }
+  out.push(
+    par(
+      [
+        t(
+          `En atención a su solicitud presento la siguiente oferta económica${
+            data.concepto?.trim() ? ` para ${data.concepto}` : ""
+          }:`,
+        ),
+      ],
+      { align: "justify", indent: cm(1) },
+    ),
+  );
 
-<p style="text-align:right"><b>TOTAL&nbsp;&nbsp;&nbsp;${formatQ(total)}</b></p>
-<p style="text-align:right"><b><u>Total</u></b> en letras: ${esc(quetzalesEnLetras(total))}</p>
+  const filas: Celda[][] = [
+    [th("Cantidad", "FFFFFF", "000000"), th("Descripción", "FFFFFF", "000000"), th("Precio Unidad", "FFFFFF", "000000"), th("Total", "FFFFFF", "000000")],
+  ];
+  for (const it of items) {
+    filas.push([
+      { text: it.cantidad, align: "center" },
+      { text: it.descripcion, align: "left" },
+      { text: formatQ(parseNum(it.precioUnidad)), align: "right" },
+      { text: formatQ(totalItem(it)), align: "right" },
+    ]);
+  }
+  out.push(tabla([12, 58, 15, 15], filas));
 
-<p><b>Observaciones:</b></p>
-<ul>${data.observaciones.filter((o) => o.trim()).map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
+  out.push(par([t(`TOTAL    ${formatQ(total)}`, { bold: true })], { align: "right" }));
+  out.push(
+    par(
+      [t("Total", { bold: true, underline: true }), t(` en letras: ${quetzalesEnLetras(total)}`)],
+      { align: "right" },
+    ),
+  );
 
-<p>En espera de su respuesta atentamente:</p>
-<p style="text-align:right">${FIRMA}</p>
-<p style="text-align:right">César Eduardo Regalado Salguero<br />Propietario<br />Contacto: ${esc(data.asesorNombre)} ${esc(data.asesorTelefono)}</p>
-`;
+  out.push(par([t("Observaciones:", { bold: true })]));
+  for (const o of data.observaciones.filter((o) => o.trim())) out.push(vinieta(o));
+
+  out.push(par(["En espera de su respuesta atentamente:"]));
+  const firma = await imagenCm(FIRMA, 5.5, "right");
+  if (firma) out.push(firma);
+  out.push(
+    parLineas(
+      `César Eduardo Regalado Salguero\nPropietario\nContacto: ${data.asesorNombre} ${data.asesorTelefono}`,
+      { align: "right" },
+    ),
+  );
+  return out;
 }
 
 // ---------- Tienda ----------
-export function wordBodyTienda(
+export async function wordBodyTienda(
   data: CotizacionTiendaData,
   numero: string,
-): string {
+): Promise<Elem[]> {
   const items = data.items.filter((i) => i.descripcion.trim() || i.precio.trim());
   const subtotal = subtotalTienda(items);
   const total = totalTienda(items, data.otros);
-  return `
-<p style="text-align:right;font-size:18pt;color:#0098ff"><b>COTIZACIÓN</b></p>
-<p style="text-align:right;margin-bottom:8pt"><b>Cotización No. ${esc(numero)}</b></p>
+  const out: Elem[] = [];
 
-${cuadroDatosWord({
-  empresaNombre: data.empresaNombre,
-  empresaNit: data.empresaNit,
-  empresaDireccion: data.empresaDireccion,
-  asesor: data.asesor,
-  empresaCelular: data.empresaCelular,
-  empresaCorreo: data.empresaCorreo,
-  fecha: data.fecha,
-  validez: data.validez,
-  clienteNombre: data.cliente,
-  clienteNit: data.nitCliente,
-  clienteCelular: data.clienteCelular,
-  clienteCorreo: data.clienteCorreo,
-})}
+  out.push(par([t("COTIZACIÓN", { bold: true, color: AZUL, size: 36 })], { align: "right", after: 40 }));
+  out.push(par([t(`Cotización No. ${numero}`, { bold: true })], { align: "right" }));
 
-<table style="width:100%">
-  <tr>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;text-align:left">DESCRIPCION</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2.6cm">Precio</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2cm">Cantidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2cm">Unidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;background:#0098ff;color:#fff;width:2.6cm">TOTAL</th>
-  </tr>
-  ${items
-    .map(
-      (it) => `<tr>
-    <td ${TD}>${esc(it.descripcion)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(parseNum(it.precio))}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:center">${esc(it.cantidad)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:center">${esc(it.unidad)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(totalItemTienda(it))}</td>
-  </tr>`,
-    )
-    .join("")}
-</table>
+  out.push(
+    bloqueDatos([
+      ["Nombre de la empresa", data.empresaNombre],
+      ["Nit", data.empresaNit],
+      ["Dirección", data.empresaDireccion],
+      ["Asesor de venta", data.asesor],
+      ["Celular", data.empresaCelular],
+      ["Correo", data.empresaCorreo],
+      ["Fecha", data.fecha],
+      ["Validez", data.validez],
+    ]),
+  );
+  out.push(
+    bloqueDatos([
+      ["Cliente", data.cliente],
+      ["Nit", data.nitCliente],
+      ["Celular", data.clienteCelular],
+      ["Correo", data.clienteCorreo],
+    ]),
+  );
 
-<table style="width:100%;margin-top:6pt"><tr>
-  <td style="vertical-align:top;width:60%">
-    <p style="background:#0098ff;color:#fff;padding:3pt"><b>TÉRMINOS Y CONDICIONES</b></p>
-    ${data.terminos.filter((t) => t.trim()).map((t) => `<p>${esc(t)}</p>`).join("")}
-  </td>
-  <td style="vertical-align:top">
-    <table style="margin-left:auto">
-      <tr><td style="text-align:right;padding:2pt">Subtotal</td><td style="text-align:right;padding:2pt">${formatQ(subtotal)}</td></tr>
-      <tr><td style="text-align:right;padding:2pt">Otros</td><td style="text-align:right;padding:2pt">${formatQ(parseNum(data.otros))}</td></tr>
-      <tr><td style="text-align:right;padding:2pt"><b>TOTAL</b></td><td style="text-align:right;padding:2pt;background:#d5ecfd"><b>${formatQ(total)}</b></td></tr>
-    </table>
-  </td>
-</tr></table>
+  const filas: Celda[][] = [
+    [th("DESCRIPCION", AZUL, "FFFFFF", "left"), th("Precio", AZUL), th("Cantidad", AZUL), th("Unidad", AZUL), th("TOTAL", AZUL)],
+  ];
+  for (const it of items) {
+    filas.push([
+      { text: it.descripcion, align: "left" },
+      { text: formatQ(parseNum(it.precio)), align: "right" },
+      { text: it.cantidad, align: "center" },
+      { text: it.unidad, align: "center" },
+      { text: formatQ(totalItemTienda(it)), align: "right" },
+    ]);
+  }
+  out.push(tabla([44, 15, 13, 13, 15], filas));
 
-<p style="text-align:center;color:#555;margin-top:18pt">Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros</p>
+  // Términos (izquierda) + totales (derecha), lado a lado, sin bordes.
+  const terminos: Paragraph[] = [
+    par([t("TÉRMINOS Y CONDICIONES", { bold: true, color: "FFFFFF" })], { shading: AZUL, after: 60 }),
+    ...data.terminos.filter((x) => x.trim()).map((x) => par([t(x)], { after: 40 })),
+  ];
+  const totales = tabla(
+    [58, 42],
+    [
+      [{ text: "Subtotal", align: "right" }, { text: formatQ(subtotal), align: "right" }],
+      [{ text: "Otros", align: "right" }, { text: formatQ(parseNum(data.otros)), align: "right" }],
+      [
+        { runs: [t("TOTAL", { bold: true })], align: "right" },
+        { runs: [t(formatQ(total), { bold: true })], align: "right", fill: AZUL_CLARO },
+      ],
+    ],
+    { borde: "none" },
+  );
+  out.push(
+    tabla([60, 40], [[{ children: terminos }, { children: [totales] }]], { borde: "none" }),
+  );
 
-<p style="text-align:right;margin-top:12pt">${FIRMA}</p>
-<p style="text-align:right">César Eduardo Regalado Salguero<br />Propietario</p>
-`;
+  out.push(
+    par([t("Si usted tiene alguna pregunta sobre esta cotización, por favor, póngase en contacto con nosotros", { color: "555555" })], { align: "center", before: 160 }),
+  );
+
+  const firma = await imagenCm(FIRMA, 5.5, "right");
+  if (firma) out.push(firma);
+  out.push(parLineas("César Eduardo Regalado Salguero\nPropietario", { align: "right" }));
+  return out;
 }
 
 // ---------- Guatecompras ----------
-export function wordBodyGuatecompras(data: CotizacionGuatecomprasData): string {
+export async function wordBodyGuatecompras(
+  data: CotizacionGuatecomprasData,
+): Promise<Elem[]> {
   const items = data.items.filter((i) => i.descripcion.trim() || i.cantidad.trim());
   const total = totalGeneral(items);
-  return `
-<p><b>Fecha:</b> ${esc(data.fecha)}<br />
-<b>Número de Operación de Guatecompras:</b> <b>${esc(data.numeroOperacion)}</b><br />
-<b>Cotización a:</b> <b>${esc(data.cotizacionA)}</b><br />
-<b>Dirigida a:</b> ${esc(data.dirigidaA)}<br />
-<b>Dirección:</b> ${esc(data.direccion)}<br />
-<b>Nombre de la empresa:</b> <b>${esc(data.empresaNombre)}</b><br />
-<b>Razón Social:</b> <b>${esc(data.razonSocial)}</b><br />
-<b>Dirección fiscal de la empresa:</b> ${esc(data.empresaDireccion)} <b>Nit:</b> ${esc(data.empresaNit)}<br />
-<b>Régimen:</b> ${esc(data.regimen)} <b>Número de teléfono:</b> ${esc(data.telefono)}<br />
-<b>Correo electrónico:</b> ${esc(data.correo1)}<br />
-<b>Correo electrónico 2:</b> ${esc(data.correo2)}</p>
+  const out: Elem[] = [];
 
-<p>Pte.<br />En atención a su solicitud presento la siguiente oferta ECONOMICA:</p>
+  out.push(
+    par([
+      t("Fecha: ", { bold: true }),
+      t(data.fecha),
+      t("Número de Operación de Guatecompras: ", { bold: true, break: 1 }),
+      t(data.numeroOperacion, { bold: true }),
+      t("Cotización a: ", { bold: true, break: 1 }),
+      t(data.cotizacionA, { bold: true }),
+      t("Dirigida a: ", { bold: true, break: 1 }),
+      t(data.dirigidaA),
+      t("Dirección: ", { bold: true, break: 1 }),
+      t(data.direccion),
+      t("Nombre de la empresa: ", { bold: true, break: 1 }),
+      t(data.empresaNombre, { bold: true }),
+      t("Razón Social: ", { bold: true, break: 1 }),
+      t(data.razonSocial, { bold: true }),
+      t("Dirección fiscal de la empresa: ", { bold: true, break: 1 }),
+      t(`${data.empresaDireccion} `),
+      t("Nit: ", { bold: true }),
+      t(data.empresaNit),
+      t("Régimen: ", { bold: true, break: 1 }),
+      t(`${data.regimen} `),
+      t("Número de teléfono: ", { bold: true }),
+      t(data.telefono),
+      t("Correo electrónico: ", { bold: true, break: 1 }),
+      t(data.correo1),
+      t("Correo electrónico 2: ", { bold: true, break: 1 }),
+      t(data.correo2),
+    ]),
+  );
 
-<table style="width:100%">
-  <tr>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center">Descripción</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:2cm">Cantidad</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:3cm">Precio Unitario</th>
-    <th ${TH} style="border:1px solid #000;padding:5pt;font-weight:bold;text-align:center;width:3cm">Total</th>
-  </tr>
-  ${items
-    .map(
-      (it) => `<tr>
-    <td ${TD}>${esc(it.descripcion)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:center">${esc(it.cantidad)}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(parseNum(it.precioUnidad))}</td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right">${formatQ(totalItem(it))}</td>
-  </tr>`,
-    )
-    .join("")}
-  <tr>
-    <td ${TD}><b>Total</b></td><td ${TD}></td><td ${TD}></td>
-    <td ${TD} style="border:1px solid #000;padding:5pt;text-align:right"><b>${formatQ(total)}</b></td>
-  </tr>
-</table>
+  out.push(parLineas("Pte.\nEn atención a su solicitud presento la siguiente oferta ECONOMICA:"));
 
-<p><b><u>TOTAL EN LETRAS:</u></b> <b>${esc(quetzalesEnLetras(total))}</b></p>
+  const filas: Celda[][] = [
+    [th("Descripción", "FFFFFF", "000000"), th("Cantidad", "FFFFFF", "000000"), th("Precio Unitario", "FFFFFF", "000000"), th("Total", "FFFFFF", "000000")],
+  ];
+  for (const it of items) {
+    filas.push([
+      { text: it.descripcion, align: "left" },
+      { text: it.cantidad, align: "center" },
+      { text: formatQ(parseNum(it.precioUnidad)), align: "right" },
+      { text: formatQ(totalItem(it)), align: "right" },
+    ]);
+  }
+  filas.push([
+    { runs: [t("Total", { bold: true })] },
+    { text: "" },
+    { text: "" },
+    { runs: [t(formatQ(total), { bold: true })], align: "right" },
+  ]);
+  out.push(tabla([55, 13, 16, 16], filas));
 
-<p><b>Observaciones:</b></p>
-<ul>${data.observaciones.filter((o) => o.trim()).map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
+  out.push(
+    par([t("TOTAL EN LETRAS: ", { bold: true, underline: true }), t(quetzalesEnLetras(total), { bold: true })]),
+  );
 
-<p>En espera de su respuesta atentamente:</p>
-<p>${FIRMA}</p>
-<p>César Eduardo Regalado<br />Propietario<br />Cel: ${esc(data.telefono)}</p>
-`;
+  out.push(par([t("Observaciones:", { bold: true })]));
+  for (const o of data.observaciones.filter((o) => o.trim())) out.push(vinieta(o));
+
+  out.push(par(["En espera de su respuesta atentamente:"]));
+  const firma = await imagenCm(FIRMA, 5.5, "left");
+  if (firma) out.push(firma);
+  out.push(parLineas(`César Eduardo Regalado\nPropietario\nCel: ${data.telefono}`));
+  return out;
 }
 
 // ---------- Carta de Garantía ----------
-export function wordBodyCarta(data: CartaData): string {
-  return `
-<p>${esc(data.ciudad)}, ${esc(data.fecha)}</p>
-<p>Señores:<br /><b>${esc(data.institucion)}</b><br />${data.dependencia ? `<b>${esc(data.dependencia)}</b><br />` : ""}Presente</p>
-<p><b>Asunto:</b> Carta de Garantía – Evento No. <b>${esc(data.evento)}</b></p>
-<p>Estimados señores:</p>
-<p style="text-align:justify;text-indent:1cm">Por medio de la presente, yo, ${esc(data.propietario)}, en calidad de propietario de la empresa ${esc(data.empresa)}, con dirección fiscal en ${esc(data.direccion)}, NIT: ${esc(data.nit)}, teléfono ${esc(data.telefono)} y correo electrónico ${esc(data.correo)}, hago constar lo siguiente:</p>
-<p style="text-align:justify">Que, en caso de ser adjudicados en el evento No. <b>${esc(data.evento)}</b>, correspondiente a la cotización realizada al <b>${esc(data.institucion)}</b>, nos comprometemos a otorgar una garantía de ${esc(data.meses)} meses sobre los equipos suministrados y los trabajos realizados.</p>
-<p style="text-align:justify">Esta garantía cubrirá cualquier desperfecto de fabricación, fallas en los equipos instalados o inconvenientes derivados de la correcta ejecución del servicio, siempre que estos no sean ocasionados por mal uso, negligencia, intervenciones no autorizadas o factores externos fuera de nuestro control como desastres naturales.</p>
-<p style="text-align:justify">Sin otro particular, quedamos a su disposición.</p>
-<p>Atentamente,</p>
-<p>${FIRMA}</p>
-<p>${esc(data.propietario)}<br />Propietario<br />${esc(data.firmanteEmpresa)}<br />Tel: ${esc(data.telefono)}<br />Correo: ${esc(data.correoFirma)}</p>
-`;
+export async function wordBodyCarta(data: CartaData): Promise<Elem[]> {
+  const out: Elem[] = [];
+  out.push(par([t(`${data.ciudad}, ${data.fecha}`)]));
+  out.push(
+    par([
+      t("Señores:"),
+      t(data.institucion, { bold: true, break: 1 }),
+      ...(data.dependencia ? [t(data.dependencia, { bold: true, break: 1 })] : []),
+      t("Presente", { break: 1 }),
+    ]),
+  );
+  out.push(par([t("Asunto: ", { bold: true }), t("Carta de Garantía – Evento No. "), t(data.evento, { bold: true })]));
+  out.push(par(["Estimados señores:"]));
+  out.push(
+    par(
+      [
+        t(
+          `Por medio de la presente, yo, ${data.propietario}, en calidad de propietario de la empresa ${data.empresa}, con dirección fiscal en ${data.direccion}, NIT: ${data.nit}, teléfono ${data.telefono} y correo electrónico ${data.correo}, hago constar lo siguiente:`,
+        ),
+      ],
+      { align: "justify", indent: cm(1) },
+    ),
+  );
+  out.push(
+    par(
+      [
+        t("Que, en caso de ser adjudicados en el evento No. "),
+        t(data.evento, { bold: true }),
+        t(", correspondiente a la cotización realizada al "),
+        t(data.institucion, { bold: true }),
+        t(`, nos comprometemos a otorgar una garantía de ${data.meses} meses sobre los equipos suministrados y los trabajos realizados.`),
+      ],
+      { align: "justify" },
+    ),
+  );
+  out.push(
+    par(
+      ["Esta garantía cubrirá cualquier desperfecto de fabricación, fallas en los equipos instalados o inconvenientes derivados de la correcta ejecución del servicio, siempre que estos no sean ocasionados por mal uso, negligencia, intervenciones no autorizadas o factores externos fuera de nuestro control como desastres naturales."],
+      { align: "justify" },
+    ),
+  );
+  out.push(par(["Sin otro particular, quedamos a su disposición."], { align: "justify" }));
+  out.push(par(["Atentamente,"]));
+  const firma = await imagenCm(FIRMA, 5.5, "left");
+  if (firma) out.push(firma);
+  out.push(
+    parLineas(
+      `${data.propietario}\nPropietario\n${data.firmanteEmpresa}\nTel: ${data.telefono}\nCorreo: ${data.correoFirma}`,
+    ),
+  );
+  return out;
 }
 
 // ---------- Piscina (PROASA) ----------
-export function wordBodyPiscina(data: PropuestaPiscinaData): string {
-  const sec = (n: number | string, t: string) =>
-    `<p style="color:#0027a5;font-size:13pt;border-bottom:2px solid #0027a5"><b>${n}. ${esc(t)}</b></p>`;
-  return `
-<table style="width:100%"><tr>
-  <td style="vertical-align:middle"><img src="/proasalogo.png" style="height:1.6cm" /></td>
-  <td style="vertical-align:middle;text-align:right;color:#555">www.proasa.com.gt</td>
-</tr></table>
-<p style="color:#0027a5"><b>PROPUESTA TÉCNICA Y ECONÓMICA</b></p>
-<p style="font-size:18pt"><b>${esc(data.titulo)}</b></p>
-<p style="color:#555">${esc(data.subtitulo)}</p>
-<p style="text-align:justify">${esc(data.descripcion)}</p>
-<table style="width:100%">
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt;width:5cm"><b>Cliente</b></td><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(data.cliente)}</td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>Ubicación</b></td><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(data.ubicacion)}</td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>Fecha de emisión</b></td><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(data.fechaEmision)}</td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>Vigencia de la oferta</b></td><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(data.vigencia)}</td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>Modalidad</b></td><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(data.modalidad)}</td></tr>
-</table>
+export async function wordBodyPiscina(data: PropuestaPiscinaData): Promise<Elem[]> {
+  const out: Elem[] = [];
 
-${sec(1, "ALCANCE DEL PROYECTO")}<p style="text-align:justify">${nl2br(data.alcanceProyecto)}</p>
-${sec(2, "ALCANCE GENERAL Y FASES CONSTRUCTIVAS")}<p style="text-align:justify">${nl2br(data.fasesTexto)}</p>
-${sec(3, "CRITERIOS DE DISEÑO Y OPERACIÓN")}<p>${nl2br(data.criterios)}</p>
-${sec(4, "SUPUESTOS, LIMITACIONES Y EXCLUSIONES")}<p style="text-align:justify">${nl2br(data.supuestos)}</p>
-${sec(5, "ALCANCES INCLUIDOS EN LA PROPUESTA")}<p>${nl2br(data.alcancesIncluidos)}</p>
+  // Encabezado: logo a la izquierda, web a la derecha.
+  const logo = await imagenCm("/proasalogo.png", 3, "left");
+  out.push(
+    tabla(
+      [50, 50],
+      [
+        [
+          { children: logo ? [logo] : [par([""])] },
+          { runs: [t("www.proasa.com.gt", { color: "555555" })], align: "right" },
+        ],
+      ],
+      { borde: "none" },
+    ),
+  );
 
-${sec(6, "PROPUESTA ECONÓMICA — OPCIONES DE INVERSIÓN")}
-<p style="text-align:justify">${esc(data.introEconomica)}</p>
-<table style="width:100%">
-  <tr>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff">Componente</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:3.5cm">OPCIÓN 1<br />${esc(data.nombreOp1)}</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:3.5cm">OPCIÓN 2<br />${esc(data.nombreOp2)}</th>
-  </tr>
-  ${data.componentes
-    .map(
-      (c) => `<tr>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(c.nombre)}</td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center">${c.op1 ? "Incluido" : "No incluido"}</td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center">${c.op2 ? "Incluido" : "No incluido"}</td>
-  </tr>`,
-    )
-    .join("")}
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>Subtotal (sin IVA)</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(Number(data.subtotalOp1) || 0)}</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(Number(data.subtotalOp2) || 0)}</b></td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt"><b>IVA 12%</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(ivaDe(data.subtotalOp1))}</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center"><b>${formatQ(ivaDe(data.subtotalOp2))}</b></td></tr>
-  <tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt;background:#d5ecfd"><b>PRECIO TOTAL (IVA incluido)</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#d5ecfd"><b>${formatQ(totalConIva(data.subtotalOp1))}</b></td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center;background:#d5ecfd"><b>${formatQ(totalConIva(data.subtotalOp2))}</b></td></tr>
-</table>
-<p style="text-align:justify;color:#555">${nl2br(data.resumenEconomico)}</p>
+  out.push(par([t("PROPUESTA TÉCNICA Y ECONÓMICA", { bold: true, color: AZUL_OSC })], { after: 40 }));
+  out.push(par([t(data.titulo, { bold: true, size: 36 })], { after: 40 }));
+  out.push(par([t(data.subtitulo, { color: "555555" })]));
+  out.push(par([t(data.descripcion)], { align: "justify" }));
 
-${sec(7, "ANOTACIONES Y GARANTÍAS")}<p>${nl2br(data.garantiasTexto)}</p>
-${sec(8, "ACEPTACIÓN Y CONDICIONES DE PAGO")}<p style="text-align:justify">${nl2br(data.condicionesPago)}</p>
+  out.push(
+    tabla(
+      [30, 70],
+      [
+        [{ runs: [t("Cliente", { bold: true })] }, { text: data.cliente }],
+        [{ runs: [t("Ubicación", { bold: true })] }, { text: data.ubicacion }],
+        [{ runs: [t("Fecha de emisión", { bold: true })] }, { text: data.fechaEmision }],
+        [{ runs: [t("Vigencia de la oferta", { bold: true })] }, { text: data.vigencia }],
+        [{ runs: [t("Modalidad", { bold: true })] }, { text: data.modalidad }],
+      ],
+      { borde: GRIS },
+    ),
+  );
 
-${sec(9, "CRONOGRAMA GENERAL")}
-<table style="width:100%">
-  <tr>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff">Fase</th>
-    <th ${TH} style="border:1px solid #c9c9c9;padding:5pt;background:#0027a5;color:#fff;width:4cm">Duración</th>
-  </tr>
-  ${data.cronograma
-    .map(
-      (f) => `<tr><td ${TD} style="border:1px solid #c9c9c9;padding:5pt">${esc(f.fase)}</td>
-    <td ${TD} style="border:1px solid #c9c9c9;padding:5pt;text-align:center">${esc(f.duracion)}</td></tr>`,
-    )
-    .join("")}
-</table>
-<p style="color:#555">${nl2br(data.cronogramaNota)}</p>
+  out.push(seccionTitulo(1, "ALCANCE DEL PROYECTO"));
+  out.push(parLineas(data.alcanceProyecto, { align: "justify" }));
+  out.push(seccionTitulo(2, "ALCANCE GENERAL Y FASES CONSTRUCTIVAS"));
+  out.push(parLineas(data.fasesTexto, { align: "justify" }));
+  out.push(seccionTitulo(3, "CRITERIOS DE DISEÑO Y OPERACIÓN"));
+  out.push(parLineas(data.criterios));
+  out.push(seccionTitulo(4, "SUPUESTOS, LIMITACIONES Y EXCLUSIONES"));
+  out.push(parLineas(data.supuestos, { align: "justify" }));
+  out.push(seccionTitulo(5, "ALCANCES INCLUIDOS EN LA PROPUESTA"));
+  out.push(parLineas(data.alcancesIncluidos));
 
-${data.planoTexto.trim() || data.planoDataUrl ? `<p style="color:#0027a5;font-size:13pt;border-bottom:2px solid #0027a5"><b>ANEXO A — PLANO DE LA PISCINA</b></p>` : ""}
-${data.planoTexto.trim() ? `<p style="text-align:justify">${nl2br(data.planoTexto)}</p>` : ""}
-${data.planoDataUrl ? `<p style="text-align:center"><img src="${data.planoDataUrl}" style="width:14cm" /></p>` : ""}
+  out.push(seccionTitulo(6, "PROPUESTA ECONÓMICA — OPCIONES DE INVERSIÓN"));
+  out.push(par([t(data.introEconomica)], { align: "justify" }));
 
-<p style="text-align:justify;border-top:2px solid #0027a5;padding-top:8pt">${esc(data.cierreTexto)}</p>
-<p>Atentamente,</p>
-<p><b>PROYECTOS DEL AGUA PROASA S.A. — Diseño y Construcción de Piscinas</b><br />
-contacto@proasa.com.gt<br />
-Asesor de contacto: ${esc(data.asesor)} · Cel. ${esc(data.asesorCel)}<br />
-Chiquimula, Guatemala, C.A.</p>
-<p><b>Método de pago:</b><br />
-Cuenta Bancaria: 2900106416 Monetaria — Proyectos del Agua S.A. (Banco Industrial)<br />
-Cuenta Bancaria: 3749033281 Monetaria — Proyectos del Agua S.A. (Banrural)</p>
-`;
+  const filasEco: Celda[][] = [
+    [
+      th("Componente", AZUL_OSC),
+      { runs: [t(`OPCIÓN 1`, { bold: true, color: "FFFFFF" }), t(data.nombreOp1, { color: "FFFFFF", break: 1 })], fill: AZUL_OSC, align: "center" },
+      { runs: [t(`OPCIÓN 2`, { bold: true, color: "FFFFFF" }), t(data.nombreOp2, { color: "FFFFFF", break: 1 })], fill: AZUL_OSC, align: "center" },
+    ],
+  ];
+  for (const c of data.componentes) {
+    filasEco.push([
+      { text: c.nombre, align: "left" },
+      { text: c.op1 ? "Incluido" : "No incluido", align: "center" },
+      { text: c.op2 ? "Incluido" : "No incluido", align: "center" },
+    ]);
+  }
+  filasEco.push([
+    { runs: [t("Subtotal (sin IVA)", { bold: true })] },
+    { runs: [t(formatQ(Number(data.subtotalOp1) || 0), { bold: true })], align: "center" },
+    { runs: [t(formatQ(Number(data.subtotalOp2) || 0), { bold: true })], align: "center" },
+  ]);
+  filasEco.push([
+    { runs: [t("IVA 12%", { bold: true })] },
+    { runs: [t(formatQ(ivaDe(data.subtotalOp1)), { bold: true })], align: "center" },
+    { runs: [t(formatQ(ivaDe(data.subtotalOp2)), { bold: true })], align: "center" },
+  ]);
+  filasEco.push([
+    { runs: [t("PRECIO TOTAL (IVA incluido)", { bold: true })], fill: AZUL_CLARO },
+    { runs: [t(formatQ(totalConIva(data.subtotalOp1)), { bold: true })], align: "center", fill: AZUL_CLARO },
+    { runs: [t(formatQ(totalConIva(data.subtotalOp2)), { bold: true })], align: "center", fill: AZUL_CLARO },
+  ]);
+  out.push(tabla([50, 25, 25], filasEco, { borde: GRIS }));
+  out.push(parLineas(data.resumenEconomico, { align: "justify", color: "555555" }));
+
+  out.push(seccionTitulo(7, "ANOTACIONES Y GARANTÍAS"));
+  out.push(parLineas(data.garantiasTexto));
+  out.push(seccionTitulo(8, "ACEPTACIÓN Y CONDICIONES DE PAGO"));
+  out.push(parLineas(data.condicionesPago, { align: "justify" }));
+
+  out.push(seccionTitulo(9, "CRONOGRAMA GENERAL"));
+  const filasCrono: Celda[][] = [[th("Fase", AZUL_OSC), th("Duración", AZUL_OSC)]];
+  for (const f of data.cronograma) {
+    filasCrono.push([
+      { text: f.fase, align: "left" },
+      { text: f.duracion, align: "center" },
+    ]);
+  }
+  out.push(tabla([70, 30], filasCrono, { borde: GRIS }));
+  out.push(parLineas(data.cronogramaNota, { color: "555555" }));
+
+  if (data.planoTexto.trim() || data.planoDataUrl) {
+    out.push(seccionTitulo("ANEXO A", "PLANO DE LA PISCINA"));
+  }
+  if (data.planoTexto.trim()) out.push(parLineas(data.planoTexto, { align: "justify" }));
+  if (data.planoDataUrl) {
+    const plano = await imagenCm(data.planoDataUrl, 14, "center");
+    if (plano) out.push(plano);
+  }
+
+  out.push(par([t(data.cierreTexto)], { align: "justify", before: 160 }));
+  out.push(par(["Atentamente,"]));
+  out.push(
+    parLineas(
+      "PROYECTOS DEL AGUA PROASA S.A. — Diseño y Construcción de Piscinas\ncontacto@proasa.com.gt\nAsesor de contacto: " +
+        `${data.asesor} · Cel. ${data.asesorCel}\nChiquimula, Guatemala, C.A.`,
+      { bold: false },
+    ),
+  );
+  out.push(
+    parLineas(
+      "Método de pago:\nCuenta Bancaria: 2900106416 Monetaria — Proyectos del Agua S.A. (Banco Industrial)\nCuenta Bancaria: 3749033281 Monetaria — Proyectos del Agua S.A. (Banrural)",
+    ),
+  );
+  return out;
 }

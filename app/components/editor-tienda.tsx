@@ -262,7 +262,7 @@ export function EditorTienda({
       await descargarWord({
         filename: toFilename(`Cotizacion ${numero}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
-        bodyHtml: wordBodyTienda(data, numero),
+        children: await wordBodyTienda(data, numero),
       });
     } catch (err) {
       console.error(err);

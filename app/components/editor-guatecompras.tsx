@@ -241,7 +241,7 @@ export function EditorGuatecompras({
       await descargarWord({
         filename: toFilename(`Cotizacion GC ${data.numeroOperacion}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
-        bodyHtml: wordBodyGuatecompras(data),
+        children: await wordBodyGuatecompras(data),
       });
     } catch (err) {
       console.error(err);

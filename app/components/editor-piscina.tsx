@@ -215,7 +215,7 @@ export function EditorPiscina({
       await descargarWord({
         filename: toFilename(`Propuesta Piscina ${data.cliente || ""}`).replace(/\.pdf$/, ".docx"),
         root: docRef.current,
-        bodyHtml: wordBodyPiscina(data),
+        children: await wordBodyPiscina(data),
       });
     } catch (err) {
       console.error(err);
