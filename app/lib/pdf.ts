@@ -76,10 +76,28 @@ async function renderPdf(
     import("jspdf"),
   ]);
 
+  // Espera a que las fuentes web terminen de cargar antes de rasterizar.
+  try {
+    await (document as unknown as { fonts?: { ready?: Promise<unknown> } }).fonts
+      ?.ready;
+  } catch {
+    /* navegadores sin document.fonts: continuar */
+  }
+
   const canvas = await html2canvas(element, {
     scale: 2, // mayor nitidez
     useCORS: true,
     backgroundColor: "#ffffff",
+    // Geist (next/font) es una fuente VARIABLE; html2canvas mide mal el ancho
+    // del espacio con fuentes variables y el texto sale amontonado
+    // ("Nombredelaempresa"). Al clonar el DOM forzamos una fuente no-variable
+    // web-safe (visualmente casi idéntica) solo para el render del PDF.
+    onclone: (doc) => {
+      const style = doc.createElement("style");
+      style.textContent =
+        "*{font-family:Arial,Helvetica,'Liberation Sans',sans-serif !important;font-variation-settings:normal !important}";
+      doc.head.appendChild(style);
+    },
   });
 
   const pdf = new jsPDF({ unit: "pt", format: "letter" });
