@@ -13,6 +13,80 @@ import {
 } from "docx";
 import { bytesImagen, cm } from "./word-kit";
 
+type Html2Canvas = typeof import("html2canvas-pro").default;
+
+// Descarga un recurso y lo devuelve como data URI.
+async function aDataUrl(src: string): Promise<string | null> {
+  try {
+    const blob = await (await fetch(src)).blob();
+    return await new Promise<string | null>((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result));
+      fr.onerror = () => resolve(null);
+      fr.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+// ¿La captura salió prácticamente en blanco? foreignObject a veces falla en
+// silencio y devuelve un lienzo vacío; en ese caso hay que reintentar.
+function estaEnBlanco(canvas: HTMLCanvasElement): boolean {
+  try {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return false;
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let distintos = 0;
+    for (let i = 0; i < data.length; i += 4 * 64) {
+      if (data[i] < 240 || data[i + 1] < 240 || data[i + 2] < 240) {
+        if (++distintos > 20) return false;
+      }
+    }
+    return true;
+  } catch {
+    return false; // lienzo contaminado: no podemos juzgar, lo damos por bueno
+  }
+}
+
+// Rasteriza el membrete.
+//
+// Se usa foreignObjectRendering porque el trazado del texto lo hace el propio
+// navegador. El render clásico de html2canvas coloca cada palabra usando
+// measureText(), y los navegadores con protección anti-fingerprinting (Brave)
+// alteran esa medida: el texto del membrete salía amontonado en el .docx.
+//
+// Dentro del SVG de foreignObject no se cargan recursos externos, así que el
+// logo se incrusta temporalmente como data URI. Si aun así el resultado sale
+// vacío, se vuelve al render clásico (mejor amontonado que en blanco).
+async function capturarMembrete(
+  m: HTMLElement,
+  html2canvas: Html2Canvas,
+): Promise<HTMLCanvasElement> {
+  const comun = { scale: 2, useCORS: true, backgroundColor: "#ffffff" };
+  const imgs = Array.from(m.querySelectorAll("img"));
+  const originales = imgs.map((i) => i.src);
+  try {
+    await Promise.all(
+      imgs.map(async (img) => {
+        const d = await aDataUrl(img.src);
+        if (!d) return;
+        img.src = d;
+        await img.decode().catch(() => {});
+      }),
+    );
+    const canvas = await html2canvas(m, { ...comun, foreignObjectRendering: true });
+    if (!estaEnBlanco(canvas)) return canvas;
+  } catch {
+    /* cae al render clásico */
+  } finally {
+    imgs.forEach((img, n) => {
+      img.src = originales[n];
+    });
+  }
+  return html2canvas(m, comun);
+}
+
 // Imagen a ancho de página completo (para membrete de encabezado/pie).
 async function imagenAncho(dataUrl: string, ratioHW: number): Promise<Paragraph | null> {
   const bytes = await bytesImagen(dataUrl);
@@ -45,11 +119,7 @@ export async function descargarWord(opts: {
     : [];
   const imgs: { dataUrl: string; ratio: number }[] = [];
   for (const m of membretes) {
-    const canvas = await html2canvas(m, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    });
+    const canvas = await capturarMembrete(m, html2canvas);
     imgs.push({
       dataUrl: canvas.toDataURL("image/png"),
       ratio: canvas.height / canvas.width,

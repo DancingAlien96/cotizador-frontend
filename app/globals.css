@@ -203,6 +203,14 @@ body {
   print-color-adjust: exact;
 }
 
+/* El clon que se usa para imprimir (lib/pdf.ts) y su pie solo existen durante
+   la impresión. Se declara ANTES del @media print para que aquella regla, con
+   la misma especificidad, gane por orden. */
+.print-host,
+.print-footer {
+  display: none;
+}
+
 /* --- Impresión: solo la carta --- */
 @media print {
   @page {
@@ -228,15 +236,25 @@ body {
     background: #ffffff;
   }
 
-  /* Ocultar todo excepto el área de impresión */
-  body * {
+  /* Botón "Descargar PDF": lib/pdf.ts clona el documento en .print-host y
+     marca el body. Solo se imprime el clon, y en flujo normal (sin position
+     absolute) para que el navegador pagine bien en varias hojas. */
+  body.imprimiendo > *:not(.print-host) {
+    display: none !important;
+  }
+  .print-host {
+    display: block;
+  }
+
+  /* Ctrl+P directo: se conserva el comportamiento de imprimir solo la carta. */
+  body:not(.imprimiendo) * {
     visibility: hidden;
   }
-  #print-area,
-  #print-area * {
+  body:not(.imprimiendo) #print-area,
+  body:not(.imprimiendo) #print-area * {
     visibility: visible;
   }
-  #print-area {
+  body:not(.imprimiendo) #print-area {
     position: absolute;
     inset: 0;
     margin: 0;
@@ -248,8 +266,32 @@ body {
   .cotizacion {
     box-shadow: none;
     max-width: none;
-    /* Ocupa exactamente una página para que el pie del membrete quede abajo */
+    /* Ocupa al menos una página para que el pie del membrete quede abajo */
     min-height: 100vh;
     margin: 0;
+  }
+
+  /* Cortes de página limpios: no partir filas y repetir el encabezado de la
+     tabla en cada hoja. */
+  thead {
+    display: table-header-group;
+  }
+  tr,
+  td,
+  th,
+  .membrete {
+    break-inside: avoid;
+  }
+
+  /* Pie opcional al final del documento (propuesta de piscina). Va en flujo
+     normal —no position:fixed— porque un pie fijo se encimaría con la última
+     fila de cada hoja: el contenido no reserva ese espacio. */
+  .print-footer {
+    display: block;
+    padding: 10px 24px;
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    break-inside: avoid;
   }
 }
