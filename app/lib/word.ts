@@ -30,23 +30,42 @@ async function aDataUrl(src: string): Promise<string | null> {
   }
 }
 
-// ¿La captura salió prácticamente en blanco? foreignObject a veces falla en
-// silencio y devuelve un lienzo vacío; en ese caso hay que reintentar.
-function estaEnBlanco(canvas: HTMLCanvasElement): boolean {
+// ¿La captura no tiene nada visible? foreignObject a veces falla en silencio y
+// devuelve un lienzo vacío o totalmente transparente; ahí hay que reintentar.
+//
+// Ojo con el canal alfa: un pixel transparente es (0,0,0,0), así que mirar solo
+// el RGB lo confunde con negro y da el lienzo por bueno. Eso metía en el .docx
+// una imagen invisible y el membrete parecía haber desaparecido.
+function noTieneNadaVisible(canvas: HTMLCanvasElement): boolean {
   try {
     const ctx = canvas.getContext("2d");
     if (!ctx) return false;
     const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let distintos = 0;
+    let visibles = 0;
     for (let i = 0; i < data.length; i += 4 * 64) {
+      if (data[i + 3] < 16) continue; // transparente: no se ve
       if (data[i] < 240 || data[i + 1] < 240 || data[i + 2] < 240) {
-        if (++distintos > 20) return false;
+        if (++visibles > 20) return false;
       }
     }
     return true;
   } catch {
     return false; // lienzo contaminado: no podemos juzgar, lo damos por bueno
   }
+}
+
+// Aplana sobre blanco: Word no maneja bien un PNG con transparencia y el
+// membrete se veria descolorido o invisible.
+function sobreBlanco(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const plano = document.createElement("canvas");
+  plano.width = canvas.width;
+  plano.height = canvas.height;
+  const ctx = plano.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, plano.width, plano.height);
+  ctx.drawImage(canvas, 0, 0);
+  return plano;
 }
 
 // Rasteriza el membrete.
@@ -76,7 +95,7 @@ async function capturarMembrete(
       }),
     );
     const canvas = await html2canvas(m, { ...comun, foreignObjectRendering: true });
-    if (!estaEnBlanco(canvas)) return canvas;
+    if (!noTieneNadaVisible(canvas)) return sobreBlanco(canvas);
   } catch {
     /* cae al render clásico */
   } finally {
@@ -84,7 +103,7 @@ async function capturarMembrete(
       img.src = originales[n];
     });
   }
-  return html2canvas(m, comun);
+  return sobreBlanco(await html2canvas(m, comun));
 }
 
 // Imagen a ancho de página completo (para membrete de encabezado/pie).
