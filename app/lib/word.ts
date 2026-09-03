@@ -12,98 +12,39 @@ import {
   Table,
 } from "docx";
 import { bytesImagen, cm } from "./word-kit";
+import {
+  aDataUrl,
+  membreteASvg,
+  noTieneNadaVisible,
+  sobreBlanco,
+  svgALienzo,
+} from "./membrete-svg";
 
 type Html2Canvas = typeof import("html2canvas-pro").default;
 
-// Descarga un recurso y lo devuelve como data URI.
-async function aDataUrl(src: string): Promise<string | null> {
-  try {
-    const blob = await (await fetch(src)).blob();
-    return await new Promise<string | null>((resolve) => {
-      const fr = new FileReader();
-      fr.onload = () => resolve(String(fr.result));
-      fr.onerror = () => resolve(null);
-      fr.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-}
-
-// ¿La captura no tiene nada visible? foreignObject a veces falla en silencio y
-// devuelve un lienzo vacío o totalmente transparente; ahí hay que reintentar.
-//
-// Ojo con el canal alfa: un pixel transparente es (0,0,0,0), así que mirar solo
-// el RGB lo confunde con negro y da el lienzo por bueno. Eso metía en el .docx
-// una imagen invisible y el membrete parecía haber desaparecido.
-function noTieneNadaVisible(canvas: HTMLCanvasElement): boolean {
-  try {
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return false;
-    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let visibles = 0;
-    for (let i = 0; i < data.length; i += 4 * 64) {
-      if (data[i + 3] < 16) continue; // transparente: no se ve
-      if (data[i] < 240 || data[i + 1] < 240 || data[i + 2] < 240) {
-        if (++visibles > 20) return false;
-      }
-    }
-    return true;
-  } catch {
-    return false; // lienzo contaminado: no podemos juzgar, lo damos por bueno
-  }
-}
-
-// Aplana sobre blanco: Word no maneja bien un PNG con transparencia y el
-// membrete se veria descolorido o invisible.
-function sobreBlanco(canvas: HTMLCanvasElement): HTMLCanvasElement {
-  const plano = document.createElement("canvas");
-  plano.width = canvas.width;
-  plano.height = canvas.height;
-  const ctx = plano.getContext("2d");
-  if (!ctx) return canvas;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, plano.width, plano.height);
-  ctx.drawImage(canvas, 0, 0);
-  return plano;
-}
-
-// Rasteriza el membrete.
-//
-// Se usa foreignObjectRendering porque el trazado del texto lo hace el propio
-// navegador. El render clásico de html2canvas coloca cada palabra usando
-// measureText(), y los navegadores con protección anti-fingerprinting (Brave)
-// alteran esa medida: el texto del membrete salía amontonado en el .docx.
-//
-// Dentro del SVG de foreignObject no se cargan recursos externos, así que el
-// logo se incrusta temporalmente como data URI. Si aun así el resultado sale
-// vacío, se vuelve al render clásico (mejor amontonado que en blanco).
+// Rasteriza el membrete por la via SVG; si falla, vuelve al render clasico de
+// html2canvas (mejor un membrete amontonado que ninguno).
 async function capturarMembrete(
   m: HTMLElement,
   html2canvas: Html2Canvas,
 ): Promise<HTMLCanvasElement> {
-  const comun = { scale: 2, useCORS: true, backgroundColor: "#ffffff" };
-  const imgs = Array.from(m.querySelectorAll("img"));
-  const originales = imgs.map((i) => i.src);
   try {
+    const logos = new Map<HTMLImageElement, string>();
     await Promise.all(
-      imgs.map(async (img) => {
+      Array.from(m.querySelectorAll("img")).map(async (img) => {
         const d = await aDataUrl(img.src);
-        if (!d) return;
-        img.src = d;
-        await img.decode().catch(() => {});
+        if (d) logos.set(img, d);
       }),
     );
-    const canvas = await html2canvas(m, { ...comun, foreignObjectRendering: true });
-    if (!noTieneNadaVisible(canvas)) return sobreBlanco(canvas);
+    const r = m.getBoundingClientRect();
+    const lienzo = await svgALienzo(membreteASvg(m, logos), r.width, r.height);
+    if (!noTieneNadaVisible(lienzo)) return lienzo;
   } catch {
-    /* cae al render clásico */
-  } finally {
-    imgs.forEach((img, n) => {
-      img.src = originales[n];
-    });
+    /* cae al render clasico */
   }
-  return sobreBlanco(await html2canvas(m, comun));
+  return sobreBlanco(
+    await html2canvas(m, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }),
+  );
 }
 
 // Imagen a ancho de página completo (para membrete de encabezado/pie).
