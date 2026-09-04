@@ -120,10 +120,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Logo() {
+function Logo({ compacto = false }: { compacto?: boolean }) {
   return (
-    <span className="flex items-center rounded-lg bg-teal-600 px-2 py-1.5">
-      <img src="/logocotizacionprivada.png" alt="PROMESA" className="h-6 w-auto" />
+    <span
+      className={`flex items-center rounded-lg bg-teal-600 ${
+        compacto ? "p-1.5" : "px-2 py-1.5"
+      }`}
+    >
+      <img
+        src="/logocotizacionprivada.png"
+        alt="PROMESA"
+        className="h-6 w-auto max-w-none shrink-0"
+      />
     </span>
   );
 }
@@ -142,11 +150,11 @@ function Contenido({
       <Link
         href="/"
         onClick={onNavegar}
-        className={`flex items-center border-b border-zinc-200 px-3 py-3 dark:border-zinc-800 ${
-          compacto ? "justify-center" : ""
+        className={`flex items-center border-b border-zinc-200 py-3 dark:border-zinc-800 ${
+          compacto ? "justify-center px-1.5" : "px-3"
         }`}
       >
-        <Logo />
+        <Logo compacto={compacto} />
       </Link>
 
       <nav className="flex-1 space-y-0.5 p-2">
