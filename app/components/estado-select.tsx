@@ -4,7 +4,8 @@ import { useState } from "react";
 import type { Estado } from "../lib/api";
 import { ESTADO_INFO, ESTADO_ORDEN, MOTIVOS_RECHAZO } from "../lib/estados";
 
-// Píldora de estado que abre un menú para cambiarlo. Al pasar a RECHAZADA
+// Píldora de estado (color de fondo + punto del mismo color) que abre un
+// menú para cambiarlo. Al pasar a RECHAZADA
 // pide el motivo, porque sin motivo los reportes de pérdida no dicen nada.
 export function EstadoSelect({
   estado,
@@ -40,6 +41,7 @@ export function EstadoSelect({
         title={motivoRechazo ? `Motivo: ${motivoRechazo}` : undefined}
         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium disabled:opacity-50 ${info.pill}`}
       >
+        <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${info.dot}`} />
         {info.label}
         <span aria-hidden className="text-[9px] opacity-60">
           ▼

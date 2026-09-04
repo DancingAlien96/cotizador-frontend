@@ -11,8 +11,10 @@ export type EstadoInfo = {
 export const ESTADO_INFO: Record<Estado, EstadoInfo> = {
   PENDIENTE: {
     label: "Pendiente",
-    pill: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
-    dot: "bg-zinc-400",
+    // Ambar (no gris): en gris se leia como "sin estado", y como la mayoria de
+    // las cotizaciones estan pendientes, la tabla entera parecia sin color.
+    pill: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    dot: "bg-amber-500",
   },
   EN_CURSO: {
     label: "En curso",

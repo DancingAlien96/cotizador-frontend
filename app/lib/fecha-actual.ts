@@ -31,3 +31,29 @@ export function enMeses(meses: number, desde: Date = new Date()): Date {
   d.setMonth(d.getMonth() + meses);
   return d;
 }
+
+// "4 de septiembre de 2026" -> "4 sep 2026". Solo para la tabla de
+// seguimiento, donde la fecha larga se partia en tres lineas y estiraba tanto
+// el ancho como el alto de cada fila. Si el texto no tiene esa forma (por
+// ejemplo "4/9/26", que usa Tienda) se devuelve tal cual.
+const MESES_CORTOS: Record<string, string> = {
+  enero: "ene",
+  febrero: "feb",
+  marzo: "mar",
+  abril: "abr",
+  mayo: "may",
+  junio: "jun",
+  julio: "jul",
+  agosto: "ago",
+  septiembre: "sep",
+  octubre: "oct",
+  noviembre: "nov",
+  diciembre: "dic",
+};
+
+export function fechaCompacta(texto: string): string {
+  const m = /^(\d{1,2}) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d{4})$/.exec(texto.trim());
+  if (!m) return texto;
+  const mes = MESES_CORTOS[m[2].toLowerCase()];
+  return mes ? `${m[1]} ${mes} ${m[3]}` : texto;
+}

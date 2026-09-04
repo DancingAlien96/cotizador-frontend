@@ -6,14 +6,13 @@ import {
   eliminarCotizacion,
   fetchHistorial,
   setEstado,
-  setSeguimiento,
 } from "../actions/historial";
 import { formatQ } from "../lib/cotizacion-privada";
+import { fechaCompacta } from "../lib/fecha-actual";
 import type { Estado, HistorialItem } from "../lib/api";
 import { ESTADO_INFO, ESTADO_ORDEN } from "../lib/estados";
 import { tipoInfo, rutaAbrir } from "../lib/tipos";
 import { EstadoSelect } from "./estado-select";
-import { SeguimientoFecha } from "./seguimiento-fecha";
 import { Tablero } from "./tablero";
 
 const LIMIT = 20;
@@ -83,20 +82,6 @@ export function HistorialGlobal({
     startEstadoTransition(async () => {
       try {
         await setEstado({ tipo: it.tipo, id: it.id, estado, motivoRechazo: motivo });
-      } catch {
-        setItems(antes);
-      }
-    });
-  }
-
-  function cambiarSeguimiento(it: HistorialItem, fecha: string | null) {
-    const antes = items;
-    setItems((prev) =>
-      prev.map((x) => (x.id === it.id ? { ...x, seguimientoAt: fecha } : x)),
-    );
-    startEstadoTransition(async () => {
-      try {
-        await setSeguimiento({ tipo: it.tipo, id: it.id, fecha });
       } catch {
         setItems(antes);
       }
@@ -202,15 +187,14 @@ export function HistorialGlobal({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800">
-              <th className="px-4 py-2.5 font-medium">Tipo</th>
-              <th className="px-4 py-2.5 font-medium">Nombre / Cliente</th>
-              <th className="px-4 py-2.5 font-medium">Estado</th>
-              <th className="px-4 py-2.5 font-medium">Recordar</th>
-              <th className="px-4 py-2.5 font-medium">Autor</th>
-              <th className="px-4 py-2.5 font-medium">No.</th>
-              <th className="px-4 py-2.5 text-right font-medium">Total</th>
-              <th className="px-4 py-2.5 font-medium">Fecha</th>
-              <th className="px-4 py-2.5"></th>
+              <th className="px-3 py-2.5 font-medium">Tipo</th>
+              <th className="px-3 py-2.5 font-medium">Nombre / Cliente</th>
+              <th className="px-3 py-2.5 font-medium">Estado</th>
+              <th className="px-3 py-2.5 font-medium">Autor</th>
+              <th className="px-3 py-2.5 font-medium">No.</th>
+              <th className="px-3 py-2.5 text-right font-medium">Total</th>
+              <th className="px-3 py-2.5 font-medium">Fecha</th>
+              <th className="sticky right-0 bg-white px-3 py-2.5 dark:bg-zinc-900"></th>
             </tr>
           </thead>
           <tbody className={isPending ? "opacity-50" : ""}>
@@ -219,40 +203,43 @@ export function HistorialGlobal({
               return (
                 <tr
                   key={it.id}
-                  className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/50"
+                  className="border-b border-zinc-100 bg-white last:border-0 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800/50"
                 >
-                  <td className="px-4 py-2.5">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${info.color}`}>
-                      {info.label}
+                  <td className="px-3 py-2.5">
+                    <span
+                      title={info.label}
+                      className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${info.color}`}
+                    >
+                      {info.corto}
                     </span>
                   </td>
-                  <td className="max-w-xs px-4 py-2.5">
-                    <span className="block truncate text-zinc-800 dark:text-zinc-100">
+                  <td className="max-w-[15rem] px-3 py-2.5">
+                    <span
+                      title={it.nombre || it.cliente || undefined}
+                      className="block truncate text-zinc-800 dark:text-zinc-100"
+                    >
                       {it.nombre || it.cliente || "—"}
                     </span>
                     {it.nombre && it.cliente && (
-                      <span className="block truncate text-[11px] text-zinc-400">
+                      <span
+                        title={it.cliente}
+                        className="block truncate text-[11px] text-zinc-400"
+                      >
                         {it.cliente}
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-3 py-2.5">
                     <EstadoSelect
                       estado={it.estado}
                       motivoRechazo={it.motivoRechazo}
                       onChange={(e, motivo) => cambiarEstado(it, e, motivo)}
                     />
                   </td>
-                  <td className="px-4 py-2.5">
-                    <SeguimientoFecha
-                      valor={it.seguimientoAt}
-                      onChange={(fecha) => cambiarSeguimiento(it, fecha)}
-                    />
-                  </td>
-                  <td className="max-w-[10rem] truncate px-4 py-2.5 text-zinc-500">
+                  <td className="max-w-[8rem] truncate px-3 py-2.5 text-zinc-500">
                     {it.autor || "—"}
                   </td>
-                  <td className="px-4 py-2.5 text-zinc-500">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-zinc-500">
                     {it.numero || "—"}
                     {it.version > 1 && (
                       <span className="ml-1 text-[11px] text-teal-600 dark:text-teal-400">
@@ -260,15 +247,17 @@ export function HistorialGlobal({
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 text-right text-zinc-700 dark:text-zinc-300">
+                  <td className="px-3 py-2.5 text-right text-zinc-700 dark:text-zinc-300">
                     {it.total != null ? formatQ(it.total) : "—"}
                   </td>
-                  <td className="px-4 py-2.5 text-zinc-500">{it.fecha || "—"}</td>
-                  <td className="px-4 py-2.5 text-right">
-                    <div className="flex items-center justify-end gap-3">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-zinc-500">
+                    {it.fecha ? fechaCompacta(it.fecha) : "—"}
+                  </td>
+                  <td className="sticky right-0 border-l border-zinc-100 bg-inherit px-3 py-2.5 text-right dark:border-zinc-800">
+                    <div className="flex items-center justify-end gap-2">
                       <Link
                         href={rutaAbrir(it)}
-                        className="font-medium text-teal-700 hover:underline"
+                        className="whitespace-nowrap font-medium text-teal-700 hover:underline dark:text-teal-400"
                       >
                         Abrir →
                       </Link>
@@ -288,7 +277,7 @@ export function HistorialGlobal({
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-zinc-400">
+                <td colSpan={8} className="px-3 py-10 text-center text-zinc-400">
                   No hay cotizaciones que coincidan.
                 </td>
               </tr>

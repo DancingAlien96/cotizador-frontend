@@ -1,31 +1,39 @@
 // Presentación de los tipos de cotización: etiqueta, color y a dónde se abre.
 // Compartido por el historial (lista) y el tablero (Kanban).
 
-export type TipoInfo = { label: string; ruta: string; color: string };
+// `corto` es la etiqueta para la tabla de seguimiento, donde el ancho
+// escasea; `label` sigue siendo el nombre completo (tablero, reportes,
+// alertas y el atributo title de la insignia).
+export type TipoInfo = { label: string; corto: string; ruta: string; color: string };
 
 export const TIPO_INFO: Record<string, TipoInfo> = {
   TIENDA: {
     label: "Tienda",
+    corto: "Tienda",
     ruta: "/cotizaciones?formato=tienda",
     color: "bg-sky-100 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300",
   },
   GUATECOMPRAS: {
     label: "Guatecompras",
+    corto: "GC",
     ruta: "/guatecompras/cotizacion",
     color: "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
   },
   EMPRESAS: {
     label: "Empresas",
+    corto: "Empresa",
     ruta: "/cotizaciones?formato=empresas",
     color: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
   },
   CARTA: {
     label: "Carta de Garantía",
+    corto: "Carta",
     ruta: "/guatecompras/carta-garantia",
     color: "bg-teal-100 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300",
   },
   PISCINA: {
     label: "Piscina",
+    corto: "Piscina",
     ruta: "/construccion-piscina",
     color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300",
   },
@@ -33,12 +41,13 @@ export const TIPO_INFO: Record<string, TipoInfo> = {
 
 const DESCONOCIDO: TipoInfo = {
   label: "—",
+  corto: "—",
   ruta: "/",
   color: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
 };
 
 export function tipoInfo(tipo: string): TipoInfo {
-  return TIPO_INFO[tipo] ?? { ...DESCONOCIDO, label: tipo };
+  return TIPO_INFO[tipo] ?? { ...DESCONOCIDO, label: tipo, corto: tipo };
 }
 
 // Enlace para abrir una cotización en su editor, respetando el ?formato= que
